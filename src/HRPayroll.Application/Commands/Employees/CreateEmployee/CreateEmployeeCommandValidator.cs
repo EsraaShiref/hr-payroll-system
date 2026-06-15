@@ -1,14 +1,17 @@
 using FluentValidation;
+using HRPayroll.Application.Interfaces;
 
 namespace HRPayroll.Application.Commands.Employees.CreateEmployee;
 
 public class CreateEmployeeCommandValidator : AbstractValidator<CreateEmployeeCommand>
 {
-    public CreateEmployeeCommandValidator()
+    public CreateEmployeeCommandValidator(IEmployeeRepository employeeRepository)
     {
         RuleFor(x => x.EmployeeCode)
             .NotEmpty().WithMessage("Employee code is required.")
-            .MaximumLength(20);
+            .MaximumLength(20)
+            .MustAsync(async (code, ct) => await employeeRepository.IsEmployeeCodeUniqueAsync(code, ct))
+                .WithMessage("Employee code already exists.");
 
         RuleFor(x => x.FirstName)
             .NotEmpty().WithMessage("First name is required.")
@@ -27,7 +30,9 @@ public class CreateEmployeeCommandValidator : AbstractValidator<CreateEmployeeCo
 
         RuleFor(x => x.NationalId)
             .NotEmpty().WithMessage("National ID is required.")
-            .Length(5, 50);
+            .Length(5, 50)
+            .MustAsync(async (nationalId, ct) => await employeeRepository.IsNationalIdUniqueAsync(nationalId, ct))
+                .WithMessage("National ID already exists.");
 
         RuleFor(x => x.DepartmentId)
             .NotEmpty().WithMessage("Department is required.");

@@ -1,13 +1,15 @@
 using ErrorOr;
 using HRPayroll.Application.DTOs.Contracts;
 using HRPayroll.Application.Interfaces;
+using HRPayroll.Application.Queries.Contracts.GetActiveContractForEmployee;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace HRPayroll.Application.Queries.Contracts.GetActiveContractForEmployee;
+namespace HRPayroll.Infrastructure.Queries;
 
-public class GetActiveContractForEmployeeQueryHandler : IRequestHandler<GetActiveContractForEmployeeQuery, ErrorOr<ContractDto>>
+public class GetActiveContractForEmployeeQueryHandler
+    : IRequestHandler<GetActiveContractForEmployeeQuery, ErrorOr<ContractDto>>
 {
     private readonly IApplicationDbContext _db;
 

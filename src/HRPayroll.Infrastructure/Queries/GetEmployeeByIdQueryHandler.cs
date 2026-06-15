@@ -2,11 +2,12 @@ using ErrorOr;
 using HRPayroll.Application.DTOs.Contracts;
 using HRPayroll.Application.DTOs.Employees;
 using HRPayroll.Application.Interfaces;
+using HRPayroll.Application.Queries.Employees.GetEmployeeById;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace HRPayroll.Application.Queries.Employees.GetEmployeeById;
+namespace HRPayroll.Infrastructure.Queries;
 
 public class GetEmployeeByIdQueryHandler : IRequestHandler<GetEmployeeByIdQuery, ErrorOr<EmployeeDetailDto>>
 {

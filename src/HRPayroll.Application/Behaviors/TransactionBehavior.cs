@@ -23,20 +23,10 @@ public class TransactionBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
         if (request is not IBaseRequest)
             return await next();
 
-        // Commands that already manage their own transactions skip this behavior
-        if (request.GetType().Name.StartsWith("Create") ||
-            request.GetType().Name.StartsWith("Update") ||
-            request.GetType().Name.StartsWith("Delete") ||
-            request.GetType().Name.StartsWith("Assign") ||
-            request.GetType().Name.StartsWith("Add") ||
-            request.GetType().Name.StartsWith("Terminate") ||
-            request.GetType().Name.StartsWith("Transfer"))
-        {
-            // These commands handle their own transactions
+        // Commands that self-manage their transactions skip the wrapping behavior
+        if (request is ISelfManagesTransaction)
             return await next();
-        }
 
-        // For other commands, wrap in a transaction
         await using var txn = await _unitOfWork.BeginTransactionAsync(ct);
         try
         {

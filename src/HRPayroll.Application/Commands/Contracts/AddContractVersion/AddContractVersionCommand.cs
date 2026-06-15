@@ -1,4 +1,5 @@
 using ErrorOr;
+using HRPayroll.Application.Interfaces;
 using MediatR;
 
 namespace HRPayroll.Application.Commands.Contracts.AddContractVersion;
@@ -10,7 +11,7 @@ public sealed record AddContractVersionCommand(
     DateOnly EffectiveFrom,
     Guid? TaxBracketSetId,
     Guid? SocialInsuranceConfigId,
-    List<AllowanceAssignmentInput>? AllowanceAssignments) : IRequest<ErrorOr<Guid>>;
+    List<AllowanceAssignmentInput>? AllowanceAssignments) : IRequest<ErrorOr<Guid>>, ISelfManagesTransaction;
 
 public sealed record AllowanceAssignmentInput(
     Guid AllowanceId,

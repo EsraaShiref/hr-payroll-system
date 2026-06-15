@@ -1,11 +1,12 @@
 using ErrorOr;
 using HRPayroll.Application.DTOs.Contracts;
 using HRPayroll.Application.Interfaces;
+using HRPayroll.Application.Queries.Contracts.GetContractVersionForDate;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace HRPayroll.Application.Queries.Contracts.GetContractVersionForDate;
+namespace HRPayroll.Infrastructure.Queries;
 
 public class GetContractVersionForDateQueryHandler
     : IRequestHandler<GetContractVersionForDateQuery, ErrorOr<ContractVersionDto>>

@@ -1,11 +1,11 @@
 using ErrorOr;
 using HRPayroll.Application.DTOs.Departments;
 using HRPayroll.Application.Interfaces;
-using Mapster;
+using HRPayroll.Application.Queries.Departments.GetDepartmentsList;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace HRPayroll.Application.Queries.Departments.GetDepartmentsList;
+namespace HRPayroll.Infrastructure.Queries;
 
 public class GetDepartmentsListQueryHandler : IRequestHandler<GetDepartmentsListQuery, ErrorOr<List<DepartmentDto>>>
 {
