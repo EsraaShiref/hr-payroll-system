@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
@@ -31,6 +31,12 @@ import { ContractDto, ContractVersionDto } from '../../../models/hr';
           <mat-icon>arrow_back</mat-icon>
         </button>
         <h1>Contract Details</h1>
+        @if (contract()?.status === 'Active') {
+          <button mat-stroked-button color="primary" (click)="goToAddVersion()">
+            <mat-icon>add</mat-icon>
+            Add Version
+          </button>
+        }
         <span class="chip" [class.active]="contract()?.status === 'Active'">
           {{ contract()?.status }}
         </span>
@@ -109,6 +115,7 @@ import { ContractDto, ContractVersionDto } from '../../../models/hr';
 })
 export class ContractDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private contractService = inject(ContractService);
 
   contract = signal<ContractDto | null>(null);
@@ -126,5 +133,10 @@ export class ContractDetailComponent implements OnInit {
       error: () => this.loading.set(false),
       complete: () => this.loading.set(false),
     });
+  }
+
+  goToAddVersion(): void {
+    const id = this.route.snapshot.paramMap.get('id')!;
+    this.router.navigate(['/contracts', id, 'versions', 'new']);
   }
 }

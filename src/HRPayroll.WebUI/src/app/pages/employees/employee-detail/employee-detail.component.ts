@@ -1,14 +1,15 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { CommonModule, DecimalPipe } from '@angular/common';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { DecimalPipe } from '@angular/common';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { TerminateDialog } from '../terminate-dialog/terminate-dialog.component';
 import { EmployeeDetailDto } from '../../../models/hr';
 
 @Component({
@@ -24,6 +25,7 @@ import { EmployeeDetailDto } from '../../../models/hr';
     MatIconModule,
     MatChipsModule,
     MatTooltipModule,
+    MatDialogModule,
   ],
   template: `
     <div class="page-container">
@@ -37,6 +39,12 @@ import { EmployeeDetailDto } from '../../../models/hr';
               [class.terminated]="employee()?.employmentStatus === 'Terminated'">
           {{ employee()?.employmentStatus }}
         </span>
+        @if (employee()?.employmentStatus === 'Active') {
+          <button mat-raised-button color="warn" (click)="openTerminateDialog()" matTooltip="Terminate employee">
+            <mat-icon>person_remove</mat-icon>
+            Terminate
+          </button>
+        }
       </div>
 
       @if (loading()) {
@@ -119,17 +127,41 @@ import { EmployeeDetailDto } from '../../../models/hr';
 })
 export class EmployeeDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private dialog = inject(MatDialog);
   private employeeService = inject(EmployeeService);
 
   employee = signal<EmployeeDetailDto | null>(null);
   loading = signal(true);
 
   ngOnInit(): void {
+    this.loadEmployee();
+  }
+
+  private loadEmployee(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.employeeService.getById(id).subscribe({
       next: e => this.employee.set(e),
       error: () => this.loading.set(false),
       complete: () => this.loading.set(false),
+    });
+  }
+
+  openTerminateDialog(): void {
+    const emp = this.employee();
+    if (!emp) return;
+
+    const dialogRef = this.dialog.open(TerminateDialog, {
+      width: '450px',
+      data: { employeeName: emp.fullName },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (!result) return;
+      this.employeeService.terminate(emp.id, result.terminationDate, result.reason).subscribe({
+        next: () => this.loadEmployee(),
+        error: () => {},
+      });
     });
   }
 }

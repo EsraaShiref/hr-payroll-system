@@ -39,4 +39,25 @@ export class EmployeeService {
   getById(id: string): Observable<EmployeeDetailDto> {
     return this.http.get<EmployeeDetailDto>(`${this.base}/${id}`);
   }
+
+  create(request: CreateEmployeeRequest): Observable<string> {
+    return this.http.post<string>(this.base, request);
+  }
+
+  terminate(id: string, terminationDate: string, reason: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/terminate`, { terminationDate, reason });
+  }
+}
+
+export interface CreateEmployeeRequest {
+  employeeCode: string;
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+  dateOfBirth: string;
+  gender: string;
+  nationalId: string;
+  departmentId: string;
+  positionId: string;
+  hireDate: string;
 }

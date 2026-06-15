@@ -37,6 +37,10 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
     <div class="page-container">
       <div class="page-header">
         <h1>Employees</h1>
+        <button mat-raised-button color="primary" routerLink="/employees/new">
+          <mat-icon>add</mat-icon>
+          New Employee
+        </button>
       </div>
 
       <div class="filters-row">

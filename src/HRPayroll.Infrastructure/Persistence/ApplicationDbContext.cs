@@ -29,6 +29,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<AllowanceAssignment> AllowanceAssignments => Set<AllowanceAssignment>();
     public DbSet<TaxBracketSet> TaxBracketSets => Set<TaxBracketSet>();
     public DbSet<SocialInsuranceConfig> SocialInsuranceConfigs => Set<SocialInsuranceConfig>();
+    public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
+    public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
+    public DbSet<LeaveBalance> LeaveBalances => Set<LeaveBalance>();
 
     IQueryable<Employee> IApplicationDbContext.Employees => Employees;
     IQueryable<Department> IApplicationDbContext.Departments => Departments;
@@ -39,6 +42,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     IQueryable<AllowanceAssignment> IApplicationDbContext.AllowanceAssignments => AllowanceAssignments;
     IQueryable<TaxBracketSet> IApplicationDbContext.TaxBracketSets => TaxBracketSets;
     IQueryable<SocialInsuranceConfig> IApplicationDbContext.SocialInsuranceConfigs => SocialInsuranceConfigs;
+    IQueryable<AttendanceRecord> IApplicationDbContext.AttendanceRecords => AttendanceRecords;
+    IQueryable<LeaveRequest> IApplicationDbContext.LeaveRequests => LeaveRequests;
+    IQueryable<LeaveBalance> IApplicationDbContext.LeaveBalances => LeaveBalances;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

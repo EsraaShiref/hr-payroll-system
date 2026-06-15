@@ -28,4 +28,23 @@ export class ContractService {
   getVersions(contractId: string): Observable<ContractVersionDto[]> {
     return this.http.get<ContractVersionDto[]>(`${this.base}/${contractId}/versions`);
   }
+
+  addVersion(contractId: string, request: AddContractVersionRequest): Observable<string> {
+    return this.http.post<string>(`${this.base}/${contractId}/versions`, request);
+  }
+}
+
+export interface AddContractVersionRequest {
+  newBaseSalaryAmount: number;
+  newBaseSalaryCurrency: string;
+  effectiveFrom: string;
+  taxBracketSetId: string | null;
+  socialInsuranceConfigId: string | null;
+  allowanceAssignments: AllowanceAssignmentInput[] | null;
+}
+
+export interface AllowanceAssignmentInput {
+  allowanceId: string;
+  overrideAmount: number | null;
+  overridePercentage: number | null;
 }

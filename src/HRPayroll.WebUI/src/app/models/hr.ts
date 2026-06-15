@@ -79,8 +79,58 @@ export interface AllowanceAssignmentDto {
 export interface DepartmentDto {
   id: string;
   name: string;
-  code: string | null;
+  code: string;
   description: string | null;
-  managerName: string | null;
+  parentDepartmentId: string | null;
+  parentDepartmentName: string | null;
+  employeeCount: number;
+}
+
+export interface PositionDto {
+  id: string;
+  title: string;
+  code: string;
+  description: string | null;
+  departmentId: string;
+  departmentName: string;
+}
+
+export interface AllowanceDto {
+  id: string;
+  name: string;
+  code: string;
+  description: string | null;
+  type: string;
+  defaultAmount: number | null;
+  defaultPercentage: number | null;
+  taxability: string;
   isActive: boolean;
+}
+
+export interface CreateEmployeeRequest {
+  employeeCode: string;
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+  dateOfBirth: string;
+  gender: string;
+  nationalId: string;
+  departmentId: string;
+  positionId: string;
+  hireDate: string;
+}
+
+export interface AddContractVersionRequest {
+  newBaseSalaryAmount: number;
+  newBaseSalaryCurrency: string;
+  effectiveFrom: string;
+  taxBracketSetId: string | null;
+  socialInsuranceConfigId: string | null;
+  allowanceAssignments: AllowanceAssignmentInput[] | null;
+}
+
+export interface AllowanceAssignmentInput {
+  allowanceId: string;
+  overrideAmount: number | null;
+  overridePercentage: number | null;
 }
