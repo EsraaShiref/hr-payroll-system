@@ -13,7 +13,10 @@ public interface IApplicationDbContext
     IQueryable<AllowanceAssignment> AllowanceAssignments { get; }
     IQueryable<TaxBracketSet> TaxBracketSets { get; }
     IQueryable<SocialInsuranceConfig> SocialInsuranceConfigs { get; }
-    IQueryable<AttendanceRecord> AttendanceRecords { get; }
+    IQueryable<AttendancePunch> AttendancePunches { get; }
+    IQueryable<AttendanceDailySummary> AttendanceDailySummaries { get; }
+    IQueryable<Shift> Shifts { get; }
+    IQueryable<Holiday> Holidays { get; }
     IQueryable<LeaveRequest> LeaveRequests { get; }
     IQueryable<LeaveBalance> LeaveBalances { get; }
 }
