@@ -83,6 +83,11 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
             .HasForeignKey(e => e.PositionId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(e => e.Shift)
+            .WithMany()
+            .HasForeignKey(e => e.ShiftId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         builder.HasMany(e => e.Contracts)
             .WithOne(c => c.Employee)
             .HasForeignKey(c => c.EmployeeId)

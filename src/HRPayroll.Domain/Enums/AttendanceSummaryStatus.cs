@@ -7,5 +7,6 @@ public enum AttendanceSummaryStatus
     EarlyDeparture,
     AbsentUnexcused,
     OnLeave,
-    Holiday
+    Holiday,
+    PendingReview
 }

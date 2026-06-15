@@ -52,7 +52,7 @@ public class AttendanceDailySummary : BaseEntity
     /// Display-friendly classification. DERIVED from boolean flags and minute fields —
     /// never stored independently. Query by the machine-readable flags (IsUnexcusedAbsence,
     /// IsOnLeave, IsHoliday, LateMinutes > 0, EarlyDepartureMinutes > 0) instead.
-    /// Invariant: Holiday > OnLeave > AbsentUnexcused > Late > EarlyDeparture > OnTime
+    /// Invariant: Holiday > OnLeave > PendingReview > AbsentUnexcused > Late > EarlyDeparture > OnTime
     /// </summary>
     public AttendanceSummaryStatus Status
     {
@@ -60,7 +60,13 @@ public class AttendanceDailySummary : BaseEntity
         {
             if (IsHoliday) return AttendanceSummaryStatus.Holiday;
             if (IsOnLeave) return AttendanceSummaryStatus.OnLeave;
-            if (IsUnexcusedAbsence || !FirstPunchIn.HasValue) return AttendanceSummaryStatus.AbsentUnexcused;
+
+            // Punched in but no punch-out = needs HR review, NOT absence
+            var effectiveOut = OverridePunchOut ?? LastPunchOut;
+            if (FirstPunchIn.HasValue && !effectiveOut.HasValue)
+                return AttendanceSummaryStatus.PendingReview;
+
+            if (IsUnexcusedAbsence) return AttendanceSummaryStatus.AbsentUnexcused;
             if (LateMinutes > 0) return AttendanceSummaryStatus.Late;
             if (EarlyDepartureMinutes > 0) return AttendanceSummaryStatus.EarlyDeparture;
             return AttendanceSummaryStatus.OnTime;
@@ -140,11 +146,13 @@ public class AttendanceDailySummary : BaseEntity
         var effectiveIn = OverridePunchIn ?? FirstPunchIn.Value;
         var effectiveOut = OverridePunchOut ?? LastPunchOut;
 
-        // Need both in and out to calculate worked time
+        // Clocked in but no punch-out: employee was present, NOT an absence.
+        // Cannot calculate minutes, requires HR review via ApplyOverride().
         if (!effectiveOut.HasValue)
         {
-            // Clocked in but not out — partial day, treat as unexcused
-            IsUnexcusedAbsence = true;
+            // IsUnexcusedAbsence stays false
+            // TotalWorkedMinutes stays 0
+            // Status getter returns PendingReview
             return;
         }
 

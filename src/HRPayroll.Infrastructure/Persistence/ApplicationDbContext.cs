@@ -29,7 +29,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<AllowanceAssignment> AllowanceAssignments => Set<AllowanceAssignment>();
     public DbSet<TaxBracketSet> TaxBracketSets => Set<TaxBracketSet>();
     public DbSet<SocialInsuranceConfig> SocialInsuranceConfigs => Set<SocialInsuranceConfig>();
-    public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
+    public DbSet<AttendancePunch> AttendancePunches => Set<AttendancePunch>();
+    public DbSet<AttendanceDailySummary> AttendanceDailySummaries => Set<AttendanceDailySummary>();
+    public DbSet<Shift> Shifts => Set<Shift>();
+    public DbSet<Holiday> Holidays => Set<Holiday>();
     public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
     public DbSet<LeaveBalance> LeaveBalances => Set<LeaveBalance>();
 
@@ -42,7 +45,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     IQueryable<AllowanceAssignment> IApplicationDbContext.AllowanceAssignments => AllowanceAssignments;
     IQueryable<TaxBracketSet> IApplicationDbContext.TaxBracketSets => TaxBracketSets;
     IQueryable<SocialInsuranceConfig> IApplicationDbContext.SocialInsuranceConfigs => SocialInsuranceConfigs;
-    IQueryable<AttendanceRecord> IApplicationDbContext.AttendanceRecords => AttendanceRecords;
+    IQueryable<AttendancePunch> IApplicationDbContext.AttendancePunches => AttendancePunches;
+    IQueryable<AttendanceDailySummary> IApplicationDbContext.AttendanceDailySummaries => AttendanceDailySummaries;
+    IQueryable<Shift> IApplicationDbContext.Shifts => Shifts;
+    IQueryable<Holiday> IApplicationDbContext.Holidays => Holidays;
     IQueryable<LeaveRequest> IApplicationDbContext.LeaveRequests => LeaveRequests;
     IQueryable<LeaveBalance> IApplicationDbContext.LeaveBalances => LeaveBalances;
 

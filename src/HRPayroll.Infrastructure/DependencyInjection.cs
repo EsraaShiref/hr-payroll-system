@@ -5,6 +5,7 @@ using HRPayroll.Infrastructure.Persistence.Identity;
 using HRPayroll.Infrastructure.Persistence.Interceptors;
 using HRPayroll.Infrastructure.Persistence.Repositories;
 using HRPayroll.Infrastructure.Services;
+using HRPayroll.Infrastructure.Services.FileParsing;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -37,10 +38,17 @@ public static class DependencyInjection
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IEmployeeRepository, EmployeeRepository>();
         services.AddScoped<IContractRepository, ContractRepository>();
-        services.AddScoped<IAttendanceRepository, AttendanceRepository>();
+        services.AddScoped<IAttendancePunchRepository, AttendancePunchRepository>();
+        services.AddScoped<IAttendanceSummaryRepository, AttendanceSummaryRepository>();
+        services.AddScoped<IHolidayRepository, HolidayRepository>();
         services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
         services.AddScoped<ILeaveBalanceRepository, LeaveBalanceRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        // File parsers
+        services.AddScoped<CsvParserService>();
+        services.AddScoped<ExcelParserService>();
+        services.AddScoped<IFileParserService, FileParserService>();
 
         // Current user
         services.AddScoped<ICurrentUserService, CurrentUserService>();

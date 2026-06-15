@@ -28,6 +28,11 @@ public class DepartmentConfiguration : IEntityTypeConfiguration<Department>
             .HasForeignKey(d => d.ParentDepartmentId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(d => d.DefaultShift)
+            .WithMany()
+            .HasForeignKey(d => d.DefaultShiftId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         builder.HasIndex(d => d.Code)
             .IsUnique()
             .HasDatabaseName("IX_Departments_Code");

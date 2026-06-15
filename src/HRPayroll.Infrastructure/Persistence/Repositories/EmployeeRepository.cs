@@ -22,6 +22,13 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
                         .ThenInclude(aa => aa.Allowance)
             .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted, ct);
 
+    public async Task<Employee?> GetWithDepartmentAndShiftAsync(Guid id, CancellationToken ct = default)
+        => await DbSet
+            .Include(e => e.Department)
+                .ThenInclude(d => d!.DefaultShift)
+            .Include(e => e.Shift)
+            .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted, ct);
+
     public async Task<bool> IsEmployeeCodeUniqueAsync(string employeeCode, CancellationToken ct = default)
         => !await DbSet.AnyAsync(e => e.EmployeeCode.Value == employeeCode && !e.IsDeleted, ct);
 

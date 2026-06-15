@@ -1,8 +1,8 @@
-using HRPayroll.Application.Commands.Attendance.ClockIn;
-using HRPayroll.Application.Commands.Attendance.ClockOut;
-using HRPayroll.Application.Common.Security;
-using HRPayroll.Application.Queries.Attendance.GetAttendanceForEmployee;
-using HRPayroll.Application.Queries.Attendance.GetMonthlyAttendanceSummary;
+using HRPayroll.Application.Commands.Attendance.UploadAttendanceFile;
+using HRPayroll.Application.Commands.Attendance.ProcessDailySummaries;
+using HRPayroll.Application.Commands.Attendance.OverrideAttendanceSummary;
+using HRPayroll.Application.Commands.Attendance.ResolveOrphanPunches;
+using HRPayroll.Application.Queries.Attendance.GetAttendanceExceptions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,40 +17,61 @@ public class AttendanceController : ApiController
     public AttendanceController(IMediator mediator) => _mediator = mediator;
 
     [Authorize(Roles = "Admin,HR")]
-    [HttpGet("employee/{employeeId:guid}")]
-    public async Task<IActionResult> GetForEmployee(
-        Guid employeeId,
-        [FromQuery] DateOnly fromDate,
-        [FromQuery] DateOnly toDate,
-        CancellationToken ct)
+    [HttpPost("upload")]
+    public async Task<IActionResult> UploadFile(IFormFile file, CancellationToken ct)
     {
-        var result = await _mediator.Send(new GetAttendanceForEmployeeQuery(employeeId, fromDate, toDate), ct);
+        if (file == null || file.Length == 0)
+            return BadRequest("File is required.");
+
+        using var ms = new MemoryStream();
+        await file.CopyToAsync(ms, ct);
+        var command = new UploadAttendanceFileCommand(file.FileName, ms.ToArray());
+        var result = await _mediator.Send(command, ct);
+        return OkOrError(result);
+    }
+
+    [Authorize(Roles = "Admin,HR")]
+    [HttpPost("process")]
+    public async Task<IActionResult> ProcessDailySummaries(
+        [FromBody] ProcessDailySummariesCommand command, CancellationToken ct)
+    {
+        var result = await _mediator.Send(command, ct);
+        return OkOrError(result);
+    }
+
+    [Authorize(Roles = "Admin,HR")]
+    [HttpPut("summaries/{summaryId:guid}/override")]
+    public async Task<IActionResult> OverrideSummary(
+        Guid summaryId,
+        [FromBody] OverrideAttendanceSummaryCommand command, CancellationToken ct)
+    {
+        if (summaryId != command.SummaryId)
+            return BadRequest("Route summaryId does not match command SummaryId.");
+
+        var result = await _mediator.Send(command, ct);
+        return OkOrError(result);
+    }
+
+    [Authorize(Roles = "Admin,HR")]
+    [HttpPost("resolve-orphans")]
+    public async Task<IActionResult> ResolveOrphans(
+        [FromBody] ResolveOrphanPunchesCommand command, CancellationToken ct)
+    {
+        var result = await _mediator.Send(command, ct);
         return OkOrError(result);
     }
 
     [Authorize(Roles = "Admin,HR,Manager")]
-    [HttpGet("summary")]
-    public async Task<IActionResult> GetMonthlySummary(
-        [FromQuery] int year,
-        [FromQuery] int month,
-        [FromQuery] Guid? departmentId = null,
+    [HttpGet("exceptions")]
+    public async Task<IActionResult> GetExceptions(
+        [FromQuery] DateOnly? fromDate = null,
+        [FromQuery] DateOnly? toDate = null,
+        [FromQuery] string? employeeId = null,
+        [FromQuery] string? exceptionType = null,
         CancellationToken ct = default)
     {
-        var result = await _mediator.Send(new GetMonthlyAttendanceSummaryQuery(year, month, departmentId), ct);
-        return OkOrError(result);
-    }
-
-    [HttpPost("clock-in")]
-    public async Task<IActionResult> ClockIn([FromBody] ClockInCommand command, CancellationToken ct)
-    {
-        var result = await _mediator.Send(command, ct);
-        return OkOrError(result);
-    }
-
-    [HttpPost("clock-out")]
-    public async Task<IActionResult> ClockOut([FromBody] ClockOutCommand command, CancellationToken ct)
-    {
-        var result = await _mediator.Send(command, ct);
+        var result = await _mediator.Send(
+            new GetAttendanceExceptionsQuery(fromDate, toDate, employeeId, exceptionType), ct);
         return OkOrError(result);
     }
 }

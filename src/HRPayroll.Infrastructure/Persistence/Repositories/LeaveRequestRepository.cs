@@ -1,5 +1,6 @@
 using HRPayroll.Application.Interfaces;
 using HRPayroll.Domain.Entities;
+using HRPayroll.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace HRPayroll.Infrastructure.Persistence.Repositories;
@@ -15,7 +16,7 @@ public class LeaveRequestRepository : Repository<LeaveRequest>, ILeaveRequestRep
         => await DbSet
             .AsNoTracking()
             .Include(l => l.Employee)
-            .Where(l => l.Status == Domain.Enums.LeaveRequestStatus.Pending
+            .Where(l => l.Status == LeaveRequestStatus.Pending
                      && l.Employee.DepartmentId == departmentId
                      && !l.IsDeleted)
             .OrderBy(l => l.StartDate)
@@ -26,5 +27,25 @@ public class LeaveRequestRepository : Repository<LeaveRequest>, ILeaveRequestRep
             .AsNoTracking()
             .Where(l => l.EmployeeId == employeeId && !l.IsDeleted)
             .OrderByDescending(l => l.CreatedAt)
+            .ToListAsync(ct);
+
+    public async Task<List<LeaveRequest>> GetApprovedForDateRangeAsync(DateOnly from, DateOnly to, CancellationToken ct = default)
+        => await DbSet
+            .AsNoTracking()
+            .Include(l => l.Employee)
+            .Where(l => l.Status == LeaveRequestStatus.Approved
+                     && l.StartDate <= to
+                     && l.EndDate >= from
+                     && !l.IsDeleted)
+            .ToListAsync(ct);
+
+    public async Task<List<LeaveRequest>> GetApprovedForEmployeeDateRangeAsync(Guid employeeId, DateOnly from, DateOnly to, CancellationToken ct = default)
+        => await DbSet
+            .AsNoTracking()
+            .Where(l => l.EmployeeId == employeeId
+                     && l.Status == LeaveRequestStatus.Approved
+                     && l.StartDate <= to
+                     && l.EndDate >= from
+                     && !l.IsDeleted)
             .ToListAsync(ct);
 }
