@@ -13,7 +13,8 @@ public class ContractVersion : BaseEntity
     public DateOnly? EffectiveTo { get; private set; }
     public Guid? TaxBracketSetId { get; private set; }
     public Guid? SocialInsuranceConfigId { get; private set; }
-    public IEnumerable<AllowanceAssignment> AllowanceAssignments { get; private set; } = new List<AllowanceAssignment>();
+    private readonly List<AllowanceAssignment> _allowanceAssignments = new();
+    public IReadOnlyCollection<AllowanceAssignment> AllowanceAssignments => _allowanceAssignments.AsReadOnly();
 
     private ContractVersion() { }
 
@@ -23,8 +24,7 @@ public class ContractVersion : BaseEntity
         DateOnly effectiveFrom,
         DateOnly? effectiveTo,
         Guid? taxBracketSetId,
-        Guid? socialInsuranceConfigId,
-        IEnumerable<AllowanceAssignment>? allowanceAssignments)
+        Guid? socialInsuranceConfigId)
     {
         if (versionNumber < 1)
             throw new ArgumentException("Version number must be 1 or greater.", nameof(versionNumber));
@@ -32,8 +32,6 @@ public class ContractVersion : BaseEntity
             throw new InvalidSalaryException(baseSalary.Amount);
         if (effectiveTo.HasValue && effectiveTo <= effectiveFrom)
             throw new InvalidContractDateRangeException("EffectiveTo must be after EffectiveFrom.");
-        if (string.IsNullOrWhiteSpace(CreatedBy))
-            CreatedBy = "system";
 
         VersionNumber = versionNumber;
         BaseSalary = baseSalary;
@@ -41,16 +39,13 @@ public class ContractVersion : BaseEntity
         EffectiveTo = effectiveTo;
         TaxBracketSetId = taxBracketSetId;
         SocialInsuranceConfigId = socialInsuranceConfigId;
+    }
 
-        if (allowanceAssignments != null)
-        {
-            foreach (var aa in allowanceAssignments)
-            {
-                if (aa.ContractVersionId != Id)
-                    throw new ArgumentException("Allowance assignment must reference this version.");
-            }
-            AllowanceAssignments = allowanceAssignments.ToList();
-        }
+    public void AddAllowanceAssignment(AllowanceAssignment assignment)
+    {
+        if (assignment == null)
+            throw new ArgumentNullException(nameof(assignment));
+        _allowanceAssignments.Add(assignment);
     }
 
     public void Close(DateOnly closedAt)

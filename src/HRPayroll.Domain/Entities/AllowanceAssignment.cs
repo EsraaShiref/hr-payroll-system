@@ -15,11 +15,17 @@ public class AllowanceAssignment : BaseEntity
 
     private AllowanceAssignment() { }
 
-    public AllowanceAssignment(Guid contractVersionId, Guid allowanceId, decimal? overrideAmount, decimal? overridePercentage)
+    public AllowanceAssignment(Guid allowanceId, decimal? overrideAmount, decimal? overridePercentage)
     {
-        ContractVersionId = contractVersionId;
         AllowanceId = allowanceId;
         SetOverrides(overrideAmount, overridePercentage);
+    }
+
+    internal void SetContractVersionId(Guid contractVersionId)
+    {
+        if (contractVersionId == Guid.Empty)
+            throw new ArgumentException("ContractVersionId cannot be empty.", nameof(contractVersionId));
+        ContractVersionId = contractVersionId;
     }
 
     public void SetOverrides(decimal? overrideAmount, decimal? overridePercentage)

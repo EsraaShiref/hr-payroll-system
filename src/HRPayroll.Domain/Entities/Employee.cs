@@ -90,7 +90,7 @@ public class Employee : BaseEntity
     public void Terminate(DateOnly terminationDate, string reason)
     {
         if (EmploymentStatus != EmploymentStatus.Active)
-            throw new DomainException("Only active employees can be terminated.");
+            throw new InvalidEmployeeStatusException($"Employee {Id} is {EmploymentStatus} and cannot be terminated.");
 
         EmploymentStatus = EmploymentStatus.Terminated;
         TerminationDate = terminationDate;

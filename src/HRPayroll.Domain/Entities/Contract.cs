@@ -107,8 +107,18 @@ public class Contract : BaseEntity
             effectiveFrom,
             null,
             taxBracketSetId,
-            socialInsuranceConfigId,
-            allowanceAssignments);
+            socialInsuranceConfigId);
+
+        var resolvedAssignments = allowanceAssignments
+            ?? previousVersion?.AllowanceAssignments
+                .Select(aa => new AllowanceAssignment(aa.AllowanceId, aa.OverrideAmount, aa.OverridePercentage))
+            ?? Enumerable.Empty<AllowanceAssignment>();
+
+        foreach (var assignment in resolvedAssignments)
+        {
+            assignment.SetContractVersionId(newVersion.Id);
+            newVersion.AddAllowanceAssignment(assignment);
+        }
 
         Versions.Add(newVersion);
 
