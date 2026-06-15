@@ -1,6 +1,6 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { LoginRequest, LoginResponse, AuthState, initialAuthState } from '../../models/auth';
@@ -17,7 +17,7 @@ interface JwtPayload {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly apiUrl = environment.apiBaseUrl;
-  private state = signal<AuthState>(this.loadState());
+  private state = signal<AuthState>(initialAuthState);
 
   readonly accessToken = computed(() => this.state().accessToken);
   readonly isAuthenticated = computed(() => this.state().isAuthenticated);
@@ -27,6 +27,15 @@ export class AuthService {
   readonly email = computed(() => this.state().email);
 
   constructor(private http: HttpClient) {}
+
+  /** Called via APP_INITIALIZER on bootstrap — tries to re-authenticate via HttpOnly cookie */
+  async initialize(): Promise<void> {
+    try {
+      await firstValueFrom(this.refreshToken());
+    } catch {
+      this.state.set(initialAuthState);
+    }
+  }
 
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, request).pipe(
@@ -42,14 +51,29 @@ export class AuthService {
 
   logout(): void {
     this.http.post(`${this.apiUrl}/auth/revoke`, {}).subscribe({
-      error: () => this.clearState(),
-      complete: () => this.clearState(),
+      error: () => this.state.set(initialAuthState),
+      complete: () => this.state.set(initialAuthState),
+    });
+  }
+
+  refreshAccessToken(): Promise<string | null> {
+    return new Promise(resolve => {
+      this.refreshToken().subscribe({
+        next: response => {
+          this.handleAuthResponse(response);
+          resolve(response.accessToken);
+        },
+        error: () => {
+          this.state.set(initialAuthState);
+          resolve(null);
+        },
+      });
     });
   }
 
   private handleAuthResponse(response: LoginResponse): void {
     const decoded = this.decodeToken(response.accessToken);
-    const newState: AuthState = {
+    this.state.set({
       accessToken: response.accessToken,
       userId: decoded.sub,
       employeeId: decoded.employeeId ?? null,
@@ -57,9 +81,7 @@ export class AuthService {
       roles: this.normalizeArray(decoded.role),
       permissions: this.normalizeArray(decoded.permission),
       isAuthenticated: true,
-    };
-    this.state.set(newState);
-    this.persistState(newState);
+    });
   }
 
   private decodeToken(token: string): JwtPayload {
@@ -72,73 +94,5 @@ export class AuthService {
   private normalizeArray(value: string | string[] | undefined): string[] {
     if (!value) return [];
     return Array.isArray(value) ? value : [value];
-  }
-
-  private persistState(state: AuthState): void {
-    try {
-      localStorage.setItem('auth_state', JSON.stringify({
-        accessToken: state.accessToken,
-        userId: state.userId,
-        employeeId: state.employeeId,
-        email: state.email,
-        roles: state.roles,
-        permissions: state.permissions,
-      }));
-    } catch {
-      // localStorage unavailable
-    }
-  }
-
-  private loadState(): AuthState {
-    try {
-      const raw = localStorage.getItem('auth_state');
-      if (!raw) return initialAuthState;
-
-      const parsed = JSON.parse(raw);
-      if (!parsed.accessToken) return initialAuthState;
-
-      const decoded = this.decodeToken(parsed.accessToken);
-      const now = Math.floor(Date.now() / 1000);
-      if (decoded.exp < now) {
-        localStorage.removeItem('auth_state');
-        return initialAuthState;
-      }
-
-      return {
-        accessToken: parsed.accessToken,
-        userId: parsed.userId ?? null,
-        employeeId: parsed.employeeId ?? null,
-        email: parsed.email ?? null,
-        roles: parsed.roles ?? [],
-        permissions: parsed.permissions ?? [],
-        isAuthenticated: true,
-      };
-    } catch {
-      return initialAuthState;
-    }
-  }
-
-  private clearState(): void {
-    this.state.set(initialAuthState);
-    try {
-      localStorage.removeItem('auth_state');
-    } catch {
-      // localStorage unavailable
-    }
-  }
-
-  refreshAccessToken(): Promise<string | null> {
-    return new Promise(resolve => {
-      this.refreshToken().subscribe({
-        next: response => {
-          this.handleAuthResponse(response);
-          resolve(response.accessToken);
-        },
-        error: () => {
-          this.clearState();
-          resolve(null);
-        },
-      });
-    });
   }
 }
