@@ -1,10 +1,11 @@
+using HRPayroll.Application.Interfaces;
 using HRPayroll.Domain.Entities;
 using HRPayroll.Infrastructure.Persistence.Interceptors;
 using Microsoft.EntityFrameworkCore;
 
 namespace HRPayroll.Infrastructure.Persistence;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : DbContext, IApplicationDbContext
 {
     private readonly AuditInterceptor _auditInterceptor;
 
@@ -25,6 +26,16 @@ public class ApplicationDbContext : DbContext
     public DbSet<AllowanceAssignment> AllowanceAssignments => Set<AllowanceAssignment>();
     public DbSet<TaxBracketSet> TaxBracketSets => Set<TaxBracketSet>();
     public DbSet<SocialInsuranceConfig> SocialInsuranceConfigs => Set<SocialInsuranceConfig>();
+
+    IQueryable<Employee> IApplicationDbContext.Employees => Employees;
+    IQueryable<Department> IApplicationDbContext.Departments => Departments;
+    IQueryable<Position> IApplicationDbContext.Positions => Positions;
+    IQueryable<Contract> IApplicationDbContext.Contracts => Contracts;
+    IQueryable<ContractVersion> IApplicationDbContext.ContractVersions => ContractVersions;
+    IQueryable<Allowance> IApplicationDbContext.Allowances => Allowances;
+    IQueryable<AllowanceAssignment> IApplicationDbContext.AllowanceAssignments => AllowanceAssignments;
+    IQueryable<TaxBracketSet> IApplicationDbContext.TaxBracketSets => TaxBracketSets;
+    IQueryable<SocialInsuranceConfig> IApplicationDbContext.SocialInsuranceConfigs => SocialInsuranceConfigs;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
