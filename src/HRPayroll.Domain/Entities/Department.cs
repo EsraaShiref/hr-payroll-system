@@ -7,6 +7,8 @@ public class Department : BaseEntity
     public string? Description { get; private set; }
     public Guid? ParentDepartmentId { get; private set; }
     public Department? ParentDepartment { get; private set; }
+    public Guid? DefaultShiftId { get; private set; }
+    public Shift? DefaultShift { get; private set; }
     public ICollection<Department> SubDepartments { get; private set; } = new List<Department>();
     public ICollection<Position> Positions { get; private set; } = new List<Position>();
     public ICollection<Employee> Employees { get; private set; } = new List<Employee>();
@@ -42,6 +44,10 @@ public class Department : BaseEntity
     public void SetDescription(string? description) => Description = description;
 
     public void ChangeParent(Guid? parentDepartmentId) => ParentDepartmentId = parentDepartmentId;
+
+    public void AssignDefaultShift(Guid shiftId) => DefaultShiftId = shiftId;
+
+    public void RemoveDefaultShift() => DefaultShiftId = null;
 
     public void AddPosition(Position position)
     {

@@ -25,6 +25,8 @@ public class Employee : BaseEntity
     public Department Department { get; private set; } = null!;
     public Guid PositionId { get; private set; }
     public Position Position { get; private set; } = null!;
+    public Guid? ShiftId { get; private set; }
+    public Shift? Shift { get; private set; }
 
     public EmploymentStatus EmploymentStatus { get; private set; }
     public DateOnly HireDate { get; private set; }
@@ -110,6 +112,10 @@ public class Employee : BaseEntity
         DepartmentId = newDepartmentId;
         PositionId = newPositionId;
     }
+
+    public void AssignShift(Guid shiftId) => ShiftId = shiftId;
+
+    public void ClearShiftOverride() => ShiftId = null;
 
     public void UpdatePersonalInfo(
         string? personalEmail,
