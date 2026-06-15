@@ -16,7 +16,6 @@ public class DepartmentsController : ApiController
         _mediator = mediator;
     }
 
-    [Authorize(Policy = "EmployeeReadAccess")]
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken ct)
     {

@@ -66,14 +66,7 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole("Admin", "HR", "Manager"));
 
     options.AddPolicy(PayrollPolicies.EmployeeReadAccess, policy =>
-        policy.RequireAssertion(context =>
-            context.User.IsInRole("Admin") ||
-            context.User.IsInRole("HR") ||
-            (context.User.IsInRole("Manager") && context.User.HasClaim(c =>
-                c.Type == PayrollClaims.Permission && c.Value == PayrollClaims.Permissions.EmployeeReadAll)) ||
-            (context.User.HasClaim(c =>
-                c.Type == PayrollClaims.Permission && c.Value == PayrollClaims.Permissions.EmployeeReadSelf) &&
-             context.User.HasClaim(c => c.Type == PayrollClaims.EmployeeId))));
+        policy.Requirements.Add(new EmployeeReadRequirement()));
 
     options.AddPolicy(PayrollPolicies.PayrollManage, policy =>
         policy.RequireAssertion(context =>

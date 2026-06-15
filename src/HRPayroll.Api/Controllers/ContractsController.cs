@@ -1,5 +1,6 @@
 using HRPayroll.Application.Commands.Contracts.AddContractVersion;
 using HRPayroll.Application.Commands.Contracts.AssignContract;
+using HRPayroll.Application.Common.Security;
 using HRPayroll.Application.Queries.Contracts.GetActiveContractForEmployee;
 using HRPayroll.Application.Queries.Contracts.GetContractVersionForDate;
 using MediatR;
@@ -12,10 +13,12 @@ namespace HRPayroll.Api.Controllers;
 public class ContractsController : ApiController
 {
     private readonly IMediator _mediator;
+    private readonly IAuthorizationService _authorizationService;
 
-    public ContractsController(IMediator mediator)
+    public ContractsController(IMediator mediator, IAuthorizationService authorizationService)
     {
         _mediator = mediator;
+        _authorizationService = authorizationService;
     }
 
     [Authorize(Roles = "Admin,HR")]
@@ -43,18 +46,24 @@ public class ContractsController : ApiController
         return OkOrError(result);
     }
 
-    [Authorize(Policy = "EmployeeReadAccess")]
     [HttpGet("active/{employeeId:guid}")]
     public async Task<IActionResult> GetActiveForEmployee(Guid employeeId, CancellationToken ct)
     {
+        var auth = await _authorizationService.AuthorizeAsync(User, employeeId, PayrollPolicies.EmployeeReadAccess);
+        if (!auth.Succeeded)
+            return Forbid();
+
         var result = await _mediator.Send(new GetActiveContractForEmployeeQuery(employeeId), ct);
         return OkOrError(result);
     }
 
-    [Authorize(Policy = "EmployeeReadAccess")]
     [HttpGet("version/{employeeId:guid}")]
     public async Task<IActionResult> GetVersionForDate(Guid employeeId, [FromQuery] DateOnly effectiveDate, CancellationToken ct)
     {
+        var auth = await _authorizationService.AuthorizeAsync(User, employeeId, PayrollPolicies.EmployeeReadAccess);
+        if (!auth.Succeeded)
+            return Forbid();
+
         var result = await _mediator.Send(new GetContractVersionForDateQuery(employeeId, effectiveDate), ct);
         return OkOrError(result);
     }

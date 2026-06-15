@@ -1,6 +1,7 @@
 using ErrorOr;
 using HRPayroll.Application.Commands.Employees.CreateEmployee;
 using HRPayroll.Application.Commands.Employees.TerminateEmployee;
+using HRPayroll.Application.Common.Security;
 using HRPayroll.Application.Queries.Employees.GetEmployeeById;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -12,16 +13,21 @@ namespace HRPayroll.Api.Controllers;
 public class EmployeesController : ApiController
 {
     private readonly IMediator _mediator;
+    private readonly IAuthorizationService _authorizationService;
 
-    public EmployeesController(IMediator mediator)
+    public EmployeesController(IMediator mediator, IAuthorizationService authorizationService)
     {
         _mediator = mediator;
+        _authorizationService = authorizationService;
     }
 
-    [Authorize(Policy = "EmployeeReadAccess")]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
+        var auth = await _authorizationService.AuthorizeAsync(User, id, PayrollPolicies.EmployeeReadAccess);
+        if (!auth.Succeeded)
+            return Forbid();
+
         var result = await _mediator.Send(new GetEmployeeByIdQuery(id), ct);
         return OkOrError(result);
     }
