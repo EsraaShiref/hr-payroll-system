@@ -9,6 +9,7 @@ public class Department : BaseEntity
     public Department? ParentDepartment { get; private set; }
     public ICollection<Department> SubDepartments { get; private set; } = new List<Department>();
     public ICollection<Position> Positions { get; private set; } = new List<Position>();
+    public ICollection<Employee> Employees { get; private set; } = new List<Employee>();
 
     private Department() { }
 
