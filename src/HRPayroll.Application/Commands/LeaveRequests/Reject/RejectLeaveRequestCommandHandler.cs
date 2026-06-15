@@ -22,7 +22,6 @@ public class RejectLeaveRequestCommandHandler : IRequestHandler<RejectLeaveReque
             return Error.NotFound("LeaveRequest.NotFound", "Leave request not found.");
 
         leaveRequest.Reject(command.RejectedBy, command.Reason);
-        leaveRequest.ClearDomainEvents();
 
         await _unitOfWork.SaveChangesAsync(ct);
         return Result.Success;

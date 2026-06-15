@@ -22,7 +22,6 @@ public class ApproveLeaveRequestCommandHandler : IRequestHandler<ApproveLeaveReq
             return Error.NotFound("LeaveRequest.NotFound", "Leave request not found.");
 
         leaveRequest.Approve(command.ApprovedBy);
-        leaveRequest.ClearDomainEvents();
 
         await _unitOfWork.SaveChangesAsync(ct);
         return Result.Success;

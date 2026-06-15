@@ -1,3 +1,4 @@
+using HRPayroll.Domain.Common;
 using HRPayroll.Domain.Enums;
 using HRPayroll.Domain.Events;
 using HRPayroll.Domain.Exceptions;
@@ -5,7 +6,7 @@ using MediatR;
 
 namespace HRPayroll.Domain.Entities;
 
-public class LeaveRequest : BaseEntity
+public class LeaveRequest : BaseEntity, IHasDomainEvents
 {
     public Guid EmployeeId { get; private set; }
     public Employee Employee { get; private set; } = null!;

@@ -1,4 +1,6 @@
 using HRPayroll.Application.Interfaces;
+using HRPayroll.Domain.Common;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace HRPayroll.Infrastructure.Persistence.Repositories;
@@ -6,14 +8,35 @@ namespace HRPayroll.Infrastructure.Persistence.Repositories;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IPublisher _publisher;
 
-    public UnitOfWork(ApplicationDbContext dbContext)
+    public UnitOfWork(ApplicationDbContext dbContext, IPublisher publisher)
     {
         _dbContext = dbContext;
+        _publisher = publisher;
     }
 
     public async Task<int> SaveChangesAsync(CancellationToken ct = default)
-        => await _dbContext.SaveChangesAsync(ct);
+    {
+        var domainEventEntities = _dbContext.ChangeTracker
+            .Entries<IHasDomainEvents>()
+            .Where(e => e.Entity.DomainEvents.Count > 0)
+            .Select(e => e.Entity)
+            .ToArray();
+
+        var result = await _dbContext.SaveChangesAsync(ct);
+
+        foreach (var entity in domainEventEntities)
+        {
+            foreach (var domainEvent in entity.DomainEvents)
+            {
+                await _publisher.Publish(domainEvent, ct);
+            }
+            entity.ClearDomainEvents();
+        }
+
+        return result;
+    }
 
     public async Task<ITransactionScope> BeginTransactionAsync(CancellationToken ct = default)
     {

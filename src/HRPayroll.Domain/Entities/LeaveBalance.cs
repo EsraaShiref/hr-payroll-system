@@ -1,10 +1,11 @@
+using HRPayroll.Domain.Common;
 using HRPayroll.Domain.Enums;
 using HRPayroll.Domain.Exceptions;
 using MediatR;
 
 namespace HRPayroll.Domain.Entities;
 
-public class LeaveBalance : BaseEntity
+public class LeaveBalance : BaseEntity, IHasDomainEvents
 {
     public Guid EmployeeId { get; private set; }
     public Employee Employee { get; private set; } = null!;

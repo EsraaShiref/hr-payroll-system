@@ -35,11 +35,9 @@ public class SubmitLeaveRequestCommandHandler : IRequestHandler<SubmitLeaveReque
         if (balance != null)
         {
             balance.Deduct(leaveRequest.TotalDays);
-            balance.ClearDomainEvents();
         }
 
         _leaveRequestRepository.Add(leaveRequest);
-        leaveRequest.ClearDomainEvents();
 
         await _unitOfWork.SaveChangesAsync(ct);
         return leaveRequest.Id;
