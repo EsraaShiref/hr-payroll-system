@@ -93,6 +93,11 @@ public class PayrollRun : BaseEntity
         _domainEvents.Add(new PayrollRunFinalizedEvent(Id, Year, Month, DateTime.UtcNow));
     }
 
+    /// <summary>
+    /// Transitions PendingReview → Draft. The existing _details collection is
+    /// intentionally preserved so HR can audit what was calculated before rejection.
+    /// A subsequent StartProcessing() may recalculate against the same or modified data.
+    /// </summary>
     public void Reject(string rejectedBy, string reason)
     {
         if (Status != PayrollRunStatus.PendingReview)
