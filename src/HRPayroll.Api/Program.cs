@@ -6,6 +6,7 @@ using HRPayroll.Application;
 using HRPayroll.Application.Common.Security;
 using HRPayroll.Infrastructure;
 using HRPayroll.Infrastructure.Services;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -25,6 +26,9 @@ builder.Host.UseSerilog();
 // Layer registrations
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// Hangfire server
+builder.Services.AddHangfireServer();
 
 // JWT Authentication
 var jwtSection = builder.Configuration.GetSection(JwtOptions.SectionName);
@@ -135,6 +139,13 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Hangfire dashboard
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireAuthorizationFilter() }
+});
+
 app.MapControllers();
 app.MapHealthChecks("/health");
 

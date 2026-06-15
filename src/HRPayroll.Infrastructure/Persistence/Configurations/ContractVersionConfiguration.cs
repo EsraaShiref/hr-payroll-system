@@ -34,6 +34,9 @@ public class ContractVersionConfiguration : IEntityTypeConfiguration<ContractVer
 
         builder.Property(v => v.EffectiveTo);
 
+        builder.Property(v => v.OvertimeRateMultiplier)
+            .HasColumnType("decimal(3,2)");
+
         builder.HasOne(v => v.Contract)
             .WithMany(c => c.Versions)
             .HasForeignKey(v => v.ContractId)

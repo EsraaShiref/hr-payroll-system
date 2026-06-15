@@ -43,7 +43,15 @@ public static class DependencyInjection
         services.AddScoped<IHolidayRepository, HolidayRepository>();
         services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
         services.AddScoped<ILeaveBalanceRepository, LeaveBalanceRepository>();
+        services.AddScoped<IPayrollRepository, PayrollRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        // Payroll services
+        services.AddScoped<IPayrollCalculationService, PayrollCalculationService>();
+        services.AddScoped<IPayrollCalculationJob, PayrollCalculationJob>();
+        services.AddScoped<IJobScheduler, JobScheduler>();
+        services.AddScoped<IPayslipGeneratorService, PayslipGeneratorService>();
+        services.AddScoped<IPaymentFileExportService, PaymentFileExportService>();
 
         // File parsers
         services.AddScoped<CsvParserService>();

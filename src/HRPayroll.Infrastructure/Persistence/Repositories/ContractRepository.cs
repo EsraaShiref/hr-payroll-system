@@ -1,5 +1,6 @@
 using HRPayroll.Application.Interfaces;
 using HRPayroll.Domain.Entities;
+using HRPayroll.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace HRPayroll.Infrastructure.Persistence.Repositories;
@@ -25,6 +26,21 @@ public class ContractRepository : Repository<Contract>, IContractRepository
                     .ThenInclude(aa => aa.Allowance)
             .FirstOrDefaultAsync(
                 c => c.EmployeeId == employeeId
-                  && c.Status == Domain.Enums.ContractStatus.Active
+                  && c.Status == ContractStatus.Active
                   && !c.IsDeleted, ct);
+
+    public async Task<ContractVersion?> GetEffectiveVersionAsync(Guid employeeId, DateOnly effectiveDate, CancellationToken ct = default)
+    {
+        var contract = await DbSet
+            .Include(c => c.Versions.Where(v => !v.IsDeleted && v.EffectiveFrom <= effectiveDate
+                && (!v.EffectiveTo.HasValue || v.EffectiveTo > effectiveDate)))
+                .ThenInclude(v => v.AllowanceAssignments.Where(aa => !aa.IsDeleted))
+                    .ThenInclude(aa => aa.Allowance)
+            .FirstOrDefaultAsync(
+                c => c.EmployeeId == employeeId
+                  && c.Status == ContractStatus.Active
+                  && !c.IsDeleted, ct);
+
+        return contract?.GetVersionEffectiveOn(effectiveDate);
+    }
 }

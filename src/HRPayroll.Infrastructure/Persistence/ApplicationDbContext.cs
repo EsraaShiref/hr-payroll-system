@@ -35,6 +35,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     public DbSet<Holiday> Holidays => Set<Holiday>();
     public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
     public DbSet<LeaveBalance> LeaveBalances => Set<LeaveBalance>();
+    public DbSet<PayrollRun> PayrollRuns => Set<PayrollRun>();
+    public DbSet<PayrollRunDetail> PayrollRunDetails => Set<PayrollRunDetail>();
+    public DbSet<PayrollPolicy> PayrollPolicies => Set<PayrollPolicy>();
 
     IQueryable<Employee> IApplicationDbContext.Employees => Employees;
     IQueryable<Department> IApplicationDbContext.Departments => Departments;
@@ -51,6 +54,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityR
     IQueryable<Holiday> IApplicationDbContext.Holidays => Holidays;
     IQueryable<LeaveRequest> IApplicationDbContext.LeaveRequests => LeaveRequests;
     IQueryable<LeaveBalance> IApplicationDbContext.LeaveBalances => LeaveBalances;
+    IQueryable<PayrollRun> IApplicationDbContext.PayrollRuns => PayrollRuns;
+    IQueryable<PayrollRunDetail> IApplicationDbContext.PayrollRunDetails => PayrollRunDetails;
+    IQueryable<PayrollPolicy> IApplicationDbContext.PayrollPolicies => PayrollPolicies;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

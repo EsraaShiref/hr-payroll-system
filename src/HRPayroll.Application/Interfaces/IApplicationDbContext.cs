@@ -19,4 +19,7 @@ public interface IApplicationDbContext
     IQueryable<Holiday> Holidays { get; }
     IQueryable<LeaveRequest> LeaveRequests { get; }
     IQueryable<LeaveBalance> LeaveBalances { get; }
+    IQueryable<PayrollRun> PayrollRuns { get; }
+    IQueryable<PayrollRunDetail> PayrollRunDetails { get; }
+    IQueryable<PayrollPolicy> PayrollPolicies { get; }
 }
