@@ -12,4 +12,5 @@ public sealed record AssignContractCommand(
     decimal BaseSalaryAmount,
     string BaseSalaryCurrency,
     Guid? TaxBracketSetId,
-    Guid? SocialInsuranceConfigId) : IRequest<ErrorOr<Guid>>, ISelfManagesTransaction;
+    Guid? SocialInsuranceConfigId,
+    decimal? OvertimeRateMultiplier) : IRequest<ErrorOr<Guid>>, ISelfManagesTransaction;

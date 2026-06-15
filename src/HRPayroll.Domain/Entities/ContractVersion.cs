@@ -13,6 +13,7 @@ public class ContractVersion : BaseEntity
     public DateOnly? EffectiveTo { get; private set; }
     public Guid? TaxBracketSetId { get; private set; }
     public Guid? SocialInsuranceConfigId { get; private set; }
+    public decimal? OvertimeRateMultiplier { get; private set; }
     private readonly List<AllowanceAssignment> _allowanceAssignments = new();
     public IReadOnlyCollection<AllowanceAssignment> AllowanceAssignments => _allowanceAssignments.AsReadOnly();
 
@@ -24,7 +25,8 @@ public class ContractVersion : BaseEntity
         DateOnly effectiveFrom,
         DateOnly? effectiveTo,
         Guid? taxBracketSetId,
-        Guid? socialInsuranceConfigId)
+        Guid? socialInsuranceConfigId,
+        decimal? overtimeRateMultiplier)
     {
         if (versionNumber < 1)
             throw new ArgumentException("Version number must be 1 or greater.", nameof(versionNumber));
@@ -32,6 +34,8 @@ public class ContractVersion : BaseEntity
             throw new InvalidSalaryException(baseSalary.Amount);
         if (effectiveTo.HasValue && effectiveTo <= effectiveFrom)
             throw new InvalidContractDateRangeException("EffectiveTo must be after EffectiveFrom.");
+        if (overtimeRateMultiplier.HasValue && (overtimeRateMultiplier.Value < 1.0m || overtimeRateMultiplier.Value > 10.0m))
+            throw new ArgumentException("Overtime rate multiplier must be between 1.0 and 10.0.", nameof(overtimeRateMultiplier));
 
         VersionNumber = versionNumber;
         BaseSalary = baseSalary;
@@ -39,6 +43,7 @@ public class ContractVersion : BaseEntity
         EffectiveTo = effectiveTo;
         TaxBracketSetId = taxBracketSetId;
         SocialInsuranceConfigId = socialInsuranceConfigId;
+        OvertimeRateMultiplier = overtimeRateMultiplier;
     }
 
     public void AddAllowanceAssignment(AllowanceAssignment assignment)

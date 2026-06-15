@@ -37,6 +37,7 @@ public class AddContractVersionCommandHandler : IRequestHandler<AddContractVersi
                 command.EffectiveFrom,
                 command.TaxBracketSetId,
                 command.SocialInsuranceConfigId,
+                command.OvertimeRateMultiplier,
                 allowanceAssignments);
 
             await _unitOfWork.SaveChangesAsync(ct);

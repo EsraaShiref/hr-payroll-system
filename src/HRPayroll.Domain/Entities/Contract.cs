@@ -88,6 +88,7 @@ public class Contract : BaseEntity
         DateOnly effectiveFrom,
         Guid? taxBracketSetId,
         Guid? socialInsuranceConfigId,
+        decimal? overtimeRateMultiplier,
         IEnumerable<AllowanceAssignment>? allowanceAssignments)
     {
         if (Status == ContractStatus.Terminated)
@@ -107,7 +108,8 @@ public class Contract : BaseEntity
             effectiveFrom,
             null,
             taxBracketSetId,
-            socialInsuranceConfigId);
+            socialInsuranceConfigId,
+            overtimeRateMultiplier ?? previousVersion?.OvertimeRateMultiplier);
 
         var resolvedAssignments = allowanceAssignments
             ?? previousVersion?.AllowanceAssignments

@@ -50,6 +50,7 @@ public class ContractsController : ApiController
             request.EffectiveFrom,
             request.TaxBracketSetId,
             request.SocialInsuranceConfigId,
+            request.OvertimeRateMultiplier,
             request.AllowanceAssignments);
 
         var result = await _mediator.Send(command, ct);
@@ -93,4 +94,5 @@ public record AddContractVersionRequest(
     DateOnly EffectiveFrom,
     Guid? TaxBracketSetId,
     Guid? SocialInsuranceConfigId,
+    decimal? OvertimeRateMultiplier,
     List<AllowanceAssignmentInput>? AllowanceAssignments);

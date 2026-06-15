@@ -11,6 +11,7 @@ public sealed record AddContractVersionCommand(
     DateOnly EffectiveFrom,
     Guid? TaxBracketSetId,
     Guid? SocialInsuranceConfigId,
+    decimal? OvertimeRateMultiplier,
     List<AllowanceAssignmentInput>? AllowanceAssignments) : IRequest<ErrorOr<Guid>>, ISelfManagesTransaction;
 
 public sealed record AllowanceAssignmentInput(

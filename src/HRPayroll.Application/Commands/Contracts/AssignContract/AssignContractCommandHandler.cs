@@ -36,7 +36,8 @@ public class AssignContractCommandHandler : IRequestHandler<AssignContractComman
 
         var initialVersion = new ContractVersion(
             1, baseSalary, command.SignedDate, null,
-            command.TaxBracketSetId, command.SocialInsuranceConfigId);
+            command.TaxBracketSetId, command.SocialInsuranceConfigId,
+            command.OvertimeRateMultiplier);
 
         var contract = new Contract(
             command.EmployeeId,
