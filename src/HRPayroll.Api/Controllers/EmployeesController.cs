@@ -3,6 +3,7 @@ using HRPayroll.Application.Commands.Employees.CreateEmployee;
 using HRPayroll.Application.Commands.Employees.TerminateEmployee;
 using HRPayroll.Application.Common.Security;
 using HRPayroll.Application.Queries.Employees.GetEmployeeById;
+using HRPayroll.Application.Queries.Employees.GetEmployeesList;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +20,26 @@ public class EmployeesController : ApiController
     {
         _mediator = mediator;
         _authorizationService = authorizationService;
+    }
+
+    [Authorize(Roles = "Admin,HR,Manager")]
+    [HttpGet]
+    public async Task<IActionResult> GetList(
+        [FromQuery] int pageIndex = 0,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? sortField = null,
+        [FromQuery] string? sortDirection = "asc",
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] Guid? departmentId = null,
+        [FromQuery] string? employmentStatus = null,
+        CancellationToken ct = default)
+    {
+        var query = new GetEmployeesListQuery(
+            pageIndex, pageSize, sortField, sortDirection,
+            searchTerm, departmentId, employmentStatus);
+
+        var result = await _mediator.Send(query, ct);
+        return OkOrError(result);
     }
 
     [HttpGet("{id:guid}")]

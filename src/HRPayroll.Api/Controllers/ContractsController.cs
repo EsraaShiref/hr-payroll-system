@@ -2,7 +2,9 @@ using HRPayroll.Application.Commands.Contracts.AddContractVersion;
 using HRPayroll.Application.Commands.Contracts.AssignContract;
 using HRPayroll.Application.Common.Security;
 using HRPayroll.Application.Queries.Contracts.GetActiveContractForEmployee;
+using HRPayroll.Application.Queries.Contracts.GetContractById;
 using HRPayroll.Application.Queries.Contracts.GetContractVersionForDate;
+using HRPayroll.Application.Queries.Contracts.GetContractVersionsForContract;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +32,14 @@ public class ContractsController : ApiController
     }
 
     [Authorize(Roles = "Admin,HR")]
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetContractByIdQuery(id), ct);
+        return OkOrError(result);
+    }
+
+    [Authorize(Roles = "Admin,HR")]
     [HttpPost("{id:guid}/versions")]
     public async Task<IActionResult> AddVersion(Guid id, [FromBody] AddContractVersionRequest request, CancellationToken ct)
     {
@@ -43,6 +53,14 @@ public class ContractsController : ApiController
             request.AllowanceAssignments);
 
         var result = await _mediator.Send(command, ct);
+        return OkOrError(result);
+    }
+
+    [Authorize(Roles = "Admin,HR,Manager")]
+    [HttpGet("{id:guid}/versions")]
+    public async Task<IActionResult> GetVersions(Guid id, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetContractVersionsForContractQuery(id), ct);
         return OkOrError(result);
     }
 
