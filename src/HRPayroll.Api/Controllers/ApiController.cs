@@ -15,7 +15,7 @@ public abstract class ApiController : ControllerBase
             errors => Problem(errors));
     }
 
-    private IActionResult Problem(List<Error> errors)
+    protected IActionResult Problem(List<Error> errors)
     {
         if (errors.Count == 0)
             return Problem();

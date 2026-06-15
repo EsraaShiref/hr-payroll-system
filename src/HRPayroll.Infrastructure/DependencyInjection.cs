@@ -1,10 +1,12 @@
 using Hangfire;
 using HRPayroll.Application.Interfaces;
 using HRPayroll.Infrastructure.Persistence;
+using HRPayroll.Infrastructure.Persistence.Identity;
 using HRPayroll.Infrastructure.Persistence.Interceptors;
 using HRPayroll.Infrastructure.Persistence.Repositories;
 using HRPayroll.Infrastructure.Services;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,6 +52,27 @@ public static class DependencyInjection
         // Hangfire storage (configured but jobs activated later)
         services.AddHangfire(config =>
             config.UseSqlServerStorage(connectionString));
+
+        // Identity
+        services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+        {
+            options.Password.RequiredLength = 8;
+            options.Password.RequireDigit = true;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+            options.User.RequireUniqueEmail = true;
+        })
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders();
+
+        // JWT options
+        services.Configure<JwtOptions>(
+            configuration.GetSection(JwtOptions.SectionName));
+
+        // Auth services
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }

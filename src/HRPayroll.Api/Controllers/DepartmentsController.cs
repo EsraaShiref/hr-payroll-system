@@ -1,10 +1,12 @@
 using HRPayroll.Application.Commands.Departments.CreateDepartment;
 using HRPayroll.Application.Queries.Departments.GetDepartmentsList;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HRPayroll.Api.Controllers;
 
+[Authorize(Roles = "Admin,HR")]
 public class DepartmentsController : ApiController
 {
     private readonly IMediator _mediator;
@@ -14,6 +16,7 @@ public class DepartmentsController : ApiController
         _mediator = mediator;
     }
 
+    [Authorize(Policy = "EmployeeReadAccess")]
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken ct)
     {

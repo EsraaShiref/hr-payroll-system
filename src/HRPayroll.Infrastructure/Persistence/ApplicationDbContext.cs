@@ -1,11 +1,14 @@
 using HRPayroll.Application.Interfaces;
 using HRPayroll.Domain.Entities;
+using HRPayroll.Infrastructure.Persistence.Identity;
 using HRPayroll.Infrastructure.Persistence.Interceptors;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace HRPayroll.Infrastructure.Persistence;
 
-public class ApplicationDbContext : DbContext, IApplicationDbContext
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>, IApplicationDbContext
 {
     private readonly AuditInterceptor _auditInterceptor;
 
@@ -45,8 +48,17 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
-        base.OnModelCreating(modelBuilder);
+        // Rename Identity tables to match project conventions
+        modelBuilder.Entity<ApplicationUser>(entity => entity.ToTable("Users"));
+        modelBuilder.Entity<IdentityRole>(entity => entity.ToTable("Roles"));
+        modelBuilder.Entity<IdentityUserRole<string>>(entity => entity.ToTable("UserRoles"));
+        modelBuilder.Entity<IdentityUserClaim<string>>(entity => entity.ToTable("UserClaims"));
+        modelBuilder.Entity<IdentityUserLogin<string>>(entity => entity.ToTable("UserLogins"));
+        modelBuilder.Entity<IdentityUserToken<string>>(entity => entity.ToTable("UserTokens"));
+        modelBuilder.Entity<IdentityRoleClaim<string>>(entity => entity.ToTable("RoleClaims"));
     }
 }
