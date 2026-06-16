@@ -121,6 +121,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddHealthChecks()
     .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
 
@@ -148,6 +149,14 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions
 
 app.MapControllers();
 app.MapHealthChecks("/health");
+
+// Dev-only data seeding
+if (app.Environment.IsDevelopment())
+{
+    using var seedScope = app.Services.CreateScope();
+    var seeder = seedScope.ServiceProvider.GetRequiredService<DataSeeder>();
+    await seeder.SeedAsync();
+}
 
 try
 {
