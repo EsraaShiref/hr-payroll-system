@@ -93,6 +93,12 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'dashboard',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/admin-dashboard/admin-dashboard.component').then(c => c.AdminDashboardComponent),
+  },
+  {
     path: 'attendance',
     canActivate: [authGuard],
     children: [
