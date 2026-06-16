@@ -142,6 +142,7 @@ public class Employee : BaseEntity
         IsEmailChangePending = true;
     }
 
+    // TODO: HR email approval endpoint — call this from an HR-facing command
     public void ApproveEmailChange()
     {
         if (!IsEmailChangePending)
@@ -151,6 +152,7 @@ public class Employee : BaseEntity
         IsEmailChangePending = false;
     }
 
+    // TODO: HR email rejection endpoint — call this from an HR-facing command
     public void RejectEmailChange()
     {
         PendingNewEmail = null;
