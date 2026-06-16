@@ -4,6 +4,7 @@ using HRPayroll.Application.Commands.Payroll.PatchRunPayroll;
 using HRPayroll.Application.Commands.Payroll.RejectPayrollRun;
 using HRPayroll.Application.Commands.Payroll.RunPayroll;
 using HRPayroll.Application.Common.Security;
+using HRPayroll.Application.DTOs.Payroll;
 using HRPayroll.Application.Interfaces;
 using HRPayroll.Application.Queries.Payroll.GetPayrollRunDetail;
 using HRPayroll.Application.Queries.Payroll.GetPayrollRunsList;
@@ -12,6 +13,7 @@ using HRPayroll.Application.Queries.Payroll.GetPayrollRunSummary;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using HRPayroll.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace HRPayroll.Api.Controllers;
@@ -121,21 +123,89 @@ public class PayrollController : ApiController
     [HttpGet("{id:guid}/export/payslips")]
     public async Task<IActionResult> ExportPayslips(Guid id, CancellationToken ct)
     {
+        var run = await _dbContext.PayrollRuns.AsNoTracking()
+            .FirstOrDefaultAsync(r => r.Id == id, ct);
+        if (run is null) return NotFound("Payroll run not found.");
+
         var details = await _dbContext.PayrollRunDetails
             .AsNoTracking()
             .Where(d => d.PayrollRunId == id && !d.IsDeleted
                 && d.Status == Domain.Enums.PayrollRunDetailStatus.Calculated)
-            .Include(d => d.Employee)
+            .Include(d => d.Employee).ThenInclude(e => e.Department)
+            .Include(d => d.Employee).ThenInclude(e => e.Position)
+            .Include(d => d.Employee).ThenInclude(e => e.Contracts.Where(c => c.Status == Domain.Enums.ContractStatus.Active))
             .ToListAsync(ct);
 
         if (details.Count == 0)
             return NotFound("No calculated payroll details found for this run.");
 
-        // TODO: Generate ZIP archive of individual payslip PDFs
-        // For now, generate a single PDF placeholder
-        var firstDetail = details.First();
-        var pdfBytes = await _payslipGenerator.GeneratePayslipPdfAsync(firstDetail, ct);
-        return File(pdfBytes, "application/pdf", $"payslips-{id}.pdf");
+        var versionIds = details.Select(d => d.ContractVersionId).Distinct().ToList();
+        var allowances = await _dbContext.ContractVersions
+            .AsNoTracking()
+            .Where(v => versionIds.Contains(v.Id))
+            .SelectMany(v => v.AllowanceAssignments)
+            .Include(a => a.Allowance)
+            .ToListAsync(ct);
+
+        var allowanceLookup = allowances
+            .GroupBy(a => a.ContractVersionId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var periodLabel = $"{new DateTime(run.Year, run.Month, 1):MMMM yyyy}";
+
+        // TODO: Generate ZIP archive; for now single PDF of first employee
+        var d = details.First();
+        var emp = d.Employee;
+        var activeContract = emp.Contracts?.FirstOrDefault();
+        var empAllowances = allowanceLookup.GetValueOrDefault(d.ContractVersionId) ?? new();
+
+        var earningsList = new List<PayslipEarningLine>
+        {
+            new("Base Salary", d.BaseSalary),
+        };
+        foreach (var aa in empAllowances.OrderBy(a => a.Allowance?.Name))
+        {
+            earningsList.Add(new(aa.Allowance?.Name ?? "Allowance", aa.ComputeValue(Money.Create(d.BaseSalary, "USD")).Amount));
+        }
+        if (d.OvertimePay > 0)
+            earningsList.Add(new("Overtime Pay", d.OvertimePay));
+
+        var deductionsList = new List<PayslipDeductionLine>
+        {
+            new("Social Insurance (Employee Share)", d.SocialInsuranceEmployeeShare),
+            new("Income Tax", d.TaxAmount),
+        };
+        if (d.LeaveDeduction > 0)
+            deductionsList.Add(new("Leave Deduction", d.LeaveDeduction));
+        if (d.LatePenaltyDeduction > 0)
+            deductionsList.Add(new("Late Penalty", d.LatePenaltyDeduction));
+
+        var payslipData = new PayslipData
+        {
+            CompanyName = "HRPayroll Corp",
+            PeriodLabel = periodLabel,
+            EmployeeId = d.EmployeeId,
+            EmployeeName = $"{emp.FirstName} {emp.LastName}",
+            EmployeeCode = emp.EmployeeCode?.Value ?? "",
+            Department = emp.Department?.Name ?? "",
+            Position = emp.Position?.Title ?? "",
+            ContractType = activeContract?.ContractType.ToString() ?? "",
+            PresentDays = d.TotalPresentDays,
+            AbsentDays = d.TotalAbsentDays,
+            LeaveDays = d.TotalLeaveDays,
+            LateOccurrences = d.LateOccurrenceCount,
+            OvertimeHours = Math.Round(d.TotalOvertimeMinutes / 60m, 1),
+            Earnings = earningsList,
+            GrossPay = d.GrossPay,
+            Deductions = deductionsList,
+            TotalDeductions = d.TotalDeductions,
+            NetPay = d.NetPay,
+            CalculatedAt = run.CompletedAt ?? run.StartedAt ?? DateTime.UtcNow,
+            PayrollRunId = id,
+        };
+
+        var pdfBytes = await _payslipGenerator.GeneratePayslipPdfAsync(payslipData, ct);
+        return File(pdfBytes, "application/pdf", $"payslip-{d.EmployeeId}.pdf");
     }
 }
 

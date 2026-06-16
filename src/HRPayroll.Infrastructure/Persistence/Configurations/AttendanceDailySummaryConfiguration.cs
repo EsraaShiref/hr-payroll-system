@@ -31,6 +31,14 @@ public class AttendanceDailySummaryConfiguration : IEntityTypeConfiguration<Atte
         // Override
         builder.Property(s => s.OverrideReason).HasMaxLength(500);
 
+        // Dispute
+        builder.Property(s => s.DisputeReason).HasMaxLength(500);
+        builder.Property(s => s.DisputeStatus)
+            .HasConversion<int>()
+            .IsRequired();
+        builder.Property(s => s.DisputeResolution).HasMaxLength(500);
+        builder.Property(s => s.DisputeResolvedBy).HasMaxLength(100);
+
         // Audit
         builder.Property(s => s.CalculatedBy).IsRequired().HasMaxLength(100);
 

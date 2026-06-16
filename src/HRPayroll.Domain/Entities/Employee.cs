@@ -16,6 +16,8 @@ public class Employee : BaseEntity
     public Gender Gender { get; private set; }
     public string NationalId { get; private set; } = string.Empty;
     public string? PersonalEmail { get; private set; }
+    public string? PendingNewEmail { get; private set; }
+    public bool IsEmailChangePending { get; private set; }
     public string? PhoneNumber { get; private set; }
     public Address? Address { get; private set; }
     public string? EmergencyContactName { get; private set; }
@@ -118,17 +120,41 @@ public class Employee : BaseEntity
     public void ClearShiftOverride() => ShiftId = null;
 
     public void UpdatePersonalInfo(
-        string? personalEmail,
         string? phoneNumber,
         Address? address,
         string? emergencyContactName,
         string? emergencyContactPhone)
     {
-        PersonalEmail = personalEmail;
         PhoneNumber = phoneNumber;
         Address = address;
         EmergencyContactName = emergencyContactName;
         EmergencyContactPhone = emergencyContactPhone;
+    }
+
+    public void RequestEmailChange(string newEmail)
+    {
+        if (string.IsNullOrWhiteSpace(newEmail))
+            throw new ArgumentException("Email is required.", nameof(newEmail));
+        if (!newEmail.Contains('@'))
+            throw new ArgumentException("Invalid email format.", nameof(newEmail));
+
+        PendingNewEmail = newEmail;
+        IsEmailChangePending = true;
+    }
+
+    public void ApproveEmailChange()
+    {
+        if (!IsEmailChangePending)
+            throw new InvalidOperationException("No pending email change to approve.");
+        PersonalEmail = PendingNewEmail;
+        PendingNewEmail = null;
+        IsEmailChangePending = false;
+    }
+
+    public void RejectEmailChange()
+    {
+        PendingNewEmail = null;
+        IsEmailChangePending = false;
     }
 
     public void ClearDomainEvents() => _domainEvents.Clear();

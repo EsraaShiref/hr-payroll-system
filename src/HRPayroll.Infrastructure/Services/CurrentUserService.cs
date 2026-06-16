@@ -30,4 +30,13 @@ public class CurrentUserService : ICurrentUserService
         _httpContextAccessor.HttpContext?.User.Claims
             .Select(c => $"{c.Type}:{c.Value}")
             .ToArray() ?? Array.Empty<string>();
+
+    public Guid? EmployeeId
+    {
+        get
+        {
+            var claim = _httpContextAccessor.HttpContext?.User.FindFirst("employeeId")?.Value;
+            return claim is not null && Guid.TryParse(claim, out var id) ? id : null;
+        }
+    }
 }

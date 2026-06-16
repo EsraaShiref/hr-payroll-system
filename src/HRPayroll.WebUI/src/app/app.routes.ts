@@ -135,6 +135,37 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/shifts/holiday-list/holiday-list.component').then(c => c.HolidayListComponent),
   },
+  {
+    path: 'self-service',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        redirectTo: 'payslips',
+        pathMatch: 'full',
+      },
+      {
+        path: 'payslips',
+        loadComponent: () =>
+          import('./pages/self-service/my-payslips/my-payslips.component').then(c => c.MyPayslipsComponent),
+      },
+      {
+        path: 'leave',
+        loadComponent: () =>
+          import('./pages/self-service/my-leave/my-leave.component').then(c => c.MyLeaveComponent),
+      },
+      {
+        path: 'attendance',
+        loadComponent: () =>
+          import('./pages/self-service/my-attendance/my-attendance.component').then(c => c.MyAttendanceComponent),
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./pages/self-service/my-profile/my-profile.component').then(c => c.MyProfileComponent),
+      },
+    ],
+  },
   { path: '', redirectTo: '/employees', pathMatch: 'full' },
   { path: '**', redirectTo: '/employees' },
 ];

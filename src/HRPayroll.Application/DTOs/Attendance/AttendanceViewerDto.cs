@@ -2,6 +2,7 @@ namespace HRPayroll.Application.DTOs.Attendance;
 
 public record AttendanceViewerItemDto
 {
+    public Guid Id { get; init; }
     public DateOnly Date { get; init; }
     public string Status { get; init; } = string.Empty;
     public string? FirstPunchIn { get; init; }

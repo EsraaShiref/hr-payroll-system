@@ -34,6 +34,7 @@ internal sealed class GetEmployeeAttendanceViewerQueryHandler
             Status = s.Status.ToString(),
             FirstPunchIn = s.FirstPunchIn?.ToString("HH:mm"),
             LastPunchOut = s.LastPunchOut?.ToString("HH:mm"),
+            Id = s.Id,
             NetWorkedMinutes = s.NetWorkedMinutes,
             LateMinutes = s.LateMinutes,
             EarlyDepartureMinutes = s.EarlyDepartureMinutes,

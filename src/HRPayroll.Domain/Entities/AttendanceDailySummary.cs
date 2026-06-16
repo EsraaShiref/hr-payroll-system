@@ -41,6 +41,15 @@ public class AttendanceDailySummary : BaseEntity
     public TimeOnly? OverridePunchOut { get; private set; }
     public string? OverrideReason { get; private set; }
 
+    // Employee dispute (self-service)
+    public TimeOnly? DisputedPunchIn { get; private set; }
+    public TimeOnly? DisputedPunchOut { get; private set; }
+    public string? DisputeReason { get; private set; }
+    public DisputeStatus DisputeStatus { get; private set; } = DisputeStatus.None;
+    public string? DisputeResolution { get; private set; }
+    public DateTime? DisputeResolvedAt { get; private set; }
+    public string? DisputeResolvedBy { get; private set; }
+
     // Notes
     public string? Notes { get; private set; }
 
@@ -217,6 +226,35 @@ public class AttendanceDailySummary : BaseEntity
     }
 
     public void SetNotes(string? notes) => Notes = notes;
+
+    public void SubmitDispute(TimeOnly? claimedPunchIn, TimeOnly? claimedPunchOut, string reason)
+    {
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Dispute reason is required.", nameof(reason));
+        if (DisputeStatus == Domain.Enums.DisputeStatus.Pending)
+            throw new InvalidOperationException("A dispute is already pending for this summary.");
+
+        DisputedPunchIn = claimedPunchIn;
+        DisputedPunchOut = claimedPunchOut;
+        DisputeReason = reason;
+        DisputeStatus = Domain.Enums.DisputeStatus.Pending;
+        DisputeResolution = null;
+        DisputeResolvedAt = null;
+        DisputeResolvedBy = null;
+    }
+
+    public void ResolveDispute(DisputeStatus resolution, string? notes, string resolvedBy)
+    {
+        if (DisputeStatus != Domain.Enums.DisputeStatus.Pending)
+            throw new InvalidOperationException("No pending dispute to resolve.");
+        if (resolution is not Domain.Enums.DisputeStatus.Resolved and not Domain.Enums.DisputeStatus.Rejected)
+            throw new ArgumentException("Resolution must be Resolved or Rejected.", nameof(resolution));
+
+        DisputeStatus = resolution;
+        DisputeResolution = notes;
+        DisputeResolvedAt = DateTime.UtcNow;
+        DisputeResolvedBy = resolvedBy;
+    }
 
     private static int ToMin(TimeOnly t) => t.Hour * 60 + t.Minute;
 }

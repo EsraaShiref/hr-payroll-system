@@ -1,8 +1,8 @@
-using HRPayroll.Domain.Entities;
+using HRPayroll.Application.DTOs.Payroll;
 
 namespace HRPayroll.Application.Interfaces;
 
 public interface IPayslipGeneratorService
 {
-    Task<byte[]> GeneratePayslipPdfAsync(PayrollRunDetail detail, CancellationToken ct = default);
+    Task<byte[]> GeneratePayslipPdfAsync(PayslipData data, CancellationToken ct = default);
 }

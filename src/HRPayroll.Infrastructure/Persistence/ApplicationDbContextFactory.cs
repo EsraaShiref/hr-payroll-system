@@ -34,5 +34,6 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
         public string? UserName => "Migration Tool";
         public string[] Roles => Array.Empty<string>();
         public string[] Claims => Array.Empty<string>();
+        public Guid? EmployeeId => null;
     }
 }

@@ -68,6 +68,7 @@ export interface OverrideSummaryRequest {
 }
 
 export interface AttendanceViewerItemDto {
+  id: string;
   date: string;
   status: string;
   firstPunchIn: string | null;

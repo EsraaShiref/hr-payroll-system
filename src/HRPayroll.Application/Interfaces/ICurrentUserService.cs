@@ -6,4 +6,5 @@ public interface ICurrentUserService
     string? UserName { get; }
     string[] Roles { get; }
     string[] Claims { get; }
+    Guid? EmployeeId { get; }
 }

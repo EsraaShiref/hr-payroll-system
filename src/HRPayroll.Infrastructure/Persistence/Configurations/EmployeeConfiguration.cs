@@ -44,6 +44,12 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.Property(e => e.PersonalEmail)
             .HasMaxLength(200);
 
+        builder.Property(e => e.PendingNewEmail)
+            .HasMaxLength(200);
+
+        builder.Property(e => e.IsEmailChangePending)
+            .IsRequired();
+
         builder.Property(e => e.PhoneNumber)
             .HasMaxLength(30);
 
