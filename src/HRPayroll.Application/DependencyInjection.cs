@@ -1,5 +1,6 @@
 using FluentValidation;
 using HRPayroll.Application.Behaviors;
+using HRPayroll.Application.Services;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,6 +19,7 @@ public static class DependencyInjection
         });
 
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
+        services.AddScoped<PunchPairingService>();
 
         return services;
     }

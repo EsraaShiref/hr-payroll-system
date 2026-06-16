@@ -11,13 +11,13 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { DashboardService } from '../../../core/services/dashboard.service';
-import { LeaveRequestService } from '../../../core/services/leave-request.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { DashboardService } from '../../core/services/dashboard.service';
+import { LeaveRequestService } from '../../core/services/leave-request.service';
+import { AuthService } from '../../core/services/auth.service';
 import {
   DashboardAttendanceSummary, PendingLeaveRequest, PayrollBudgetSummary,
   HeadcountTrend, UpcomingContractRenewal, MonthlyHeadcount,
-} from '../../../models/dashboard';
+} from '../../models/dashboard';
 
 @Component({
   selector: 'app-admin-dashboard',

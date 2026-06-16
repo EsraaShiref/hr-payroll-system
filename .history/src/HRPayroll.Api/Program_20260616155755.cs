@@ -123,8 +123,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddScoped<DataSeeder>();
-builder.Services.AddHealthChecks();
-
+builder.Services.AddHealthChecks()
+    .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
 
 var app = builder.Build();
 
@@ -138,7 +138,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 

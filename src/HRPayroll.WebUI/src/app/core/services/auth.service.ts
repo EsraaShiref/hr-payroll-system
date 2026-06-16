@@ -50,7 +50,7 @@ export class AuthService {
   }
 
   logout(): void {
-    this.http.post(`${this.apiUrl}/auth/revoke`, {}).subscribe({
+    this.http.post<void>(`${this.apiUrl}/auth/revoke`, {}).subscribe({
       error: () => this.state.set(initialAuthState),
       complete: () => this.state.set(initialAuthState),
     });
