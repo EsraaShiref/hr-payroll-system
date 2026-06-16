@@ -9,7 +9,7 @@ public class EmployeeRepository : Repository<Employee>, IEmployeeRepository
 {
     public EmployeeRepository(ApplicationDbContext dbContext) : base(dbContext) { }
 
-    public async Task<Employee?> GetByIdAsync(Guid id, CancellationToken ct = default)
+    public new async Task<Employee?> GetByIdAsync(Guid id, CancellationToken ct = default)
         => await DbSet.FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted, ct);
 
     public async Task<Employee?> GetByEmployeeCodeAsync(string employeeCode, CancellationToken ct = default)

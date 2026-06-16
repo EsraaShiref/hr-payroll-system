@@ -71,6 +71,70 @@ export const routes: Routes = [
       },
     ],
   },
+  {
+    path: 'payroll',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/payroll/payroll-run-list/payroll-run-list.component').then(c => c.PayrollRunListComponent),
+      },
+      {
+        path: ':id',
+        loadComponent: () =>
+          import('./pages/payroll/payroll-run-dashboard/payroll-run-dashboard.component').then(c => c.PayrollRunDashboardComponent),
+      },
+      {
+        path: ':runId/details/:employeeId',
+        loadComponent: () =>
+          import('./pages/payroll/payroll-run-detail/payroll-run-detail.component').then(c => c.PayrollRunDetailComponent),
+      },
+    ],
+  },
+  {
+    path: 'attendance',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: 'exceptions',
+        loadComponent: () =>
+          import('./pages/attendance/exceptions-report/exceptions-report.component').then(c => c.ExceptionsReportComponent),
+      },
+      {
+        path: 'viewer',
+        loadComponent: () =>
+          import('./pages/attendance/attendance-viewer/attendance-viewer.component').then(c => c.AttendanceViewerComponent),
+      },
+    ],
+  },
+  {
+    path: 'shifts',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/shifts/shift-list/shift-list.component').then(c => c.ShiftListComponent),
+      },
+      {
+        path: 'new',
+        loadComponent: () =>
+          import('./pages/shifts/shift-form/shift-form.component').then(c => c.ShiftFormComponent),
+      },
+      {
+        path: ':id',
+        loadComponent: () =>
+          import('./pages/shifts/shift-form/shift-form.component').then(c => c.ShiftFormComponent),
+      },
+    ],
+  },
+  {
+    path: 'holidays',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/shifts/holiday-list/holiday-list.component').then(c => c.HolidayListComponent),
+  },
   { path: '', redirectTo: '/employees', pathMatch: 'full' },
   { path: '**', redirectTo: '/employees' },
 ];

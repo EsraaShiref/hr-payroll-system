@@ -8,7 +8,7 @@ public class PayrollRepository : Repository<PayrollRun>, IPayrollRepository
 {
     public PayrollRepository(ApplicationDbContext dbContext) : base(dbContext) { }
 
-    public async Task<PayrollRun?> GetByIdAsync(Guid payrollRunId, CancellationToken ct = default)
+    public new async Task<PayrollRun?> GetByIdAsync(Guid payrollRunId, CancellationToken ct = default)
         => await DbSet.FirstOrDefaultAsync(r => r.Id == payrollRunId && !r.IsDeleted, ct);
 
     public async Task<PayrollRun?> GetRunWithDetailsAsync(Guid payrollRunId, CancellationToken ct = default)

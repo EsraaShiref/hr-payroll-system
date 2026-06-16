@@ -4,6 +4,7 @@ using HRPayroll.Application.Commands.Payroll.PatchRunPayroll;
 using HRPayroll.Application.Commands.Payroll.RejectPayrollRun;
 using HRPayroll.Application.Commands.Payroll.RunPayroll;
 using HRPayroll.Application.Common.Security;
+using HRPayroll.Application.Interfaces;
 using HRPayroll.Application.Queries.Payroll.GetPayrollRunDetail;
 using HRPayroll.Application.Queries.Payroll.GetPayrollRunsList;
 using HRPayroll.Application.Queries.Payroll.GetPayrollRunStatus;
@@ -11,6 +12,7 @@ using HRPayroll.Application.Queries.Payroll.GetPayrollRunSummary;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HRPayroll.Api.Controllers;
 
@@ -18,10 +20,20 @@ namespace HRPayroll.Api.Controllers;
 public class PayrollController : ApiController
 {
     private readonly IMediator _mediator;
+    private readonly IPaymentFileExportService _paymentFileExport;
+    private readonly IPayslipGeneratorService _payslipGenerator;
+    private readonly IApplicationDbContext _dbContext;
 
-    public PayrollController(IMediator mediator)
+    public PayrollController(
+        IMediator mediator,
+        IPaymentFileExportService paymentFileExport,
+        IPayslipGeneratorService payslipGenerator,
+        IApplicationDbContext dbContext)
     {
         _mediator = mediator;
+        _paymentFileExport = paymentFileExport;
+        _payslipGenerator = payslipGenerator;
+        _dbContext = dbContext;
     }
 
     [HttpPost("run")]
@@ -87,6 +99,43 @@ public class PayrollController : ApiController
         var command = new PatchRunPayrollCommand(request.OriginalRunId, request.EmployeeIds);
         var result = await _mediator.Send(command, ct);
         return OkOrError(result);
+    }
+
+    [HttpGet("{id:guid}/export/csv")]
+    public async Task<IActionResult> ExportCsv(Guid id, CancellationToken ct)
+    {
+        var details = await _dbContext.PayrollRunDetails
+            .AsNoTracking()
+            .Where(d => d.PayrollRunId == id && !d.IsDeleted
+                && d.Status == Domain.Enums.PayrollRunDetailStatus.Calculated)
+            .Include(d => d.Employee)
+            .ToListAsync(ct);
+
+        if (details.Count == 0)
+            return NotFound("No calculated payroll details found for this run.");
+
+        var csvBytes = await _paymentFileExport.GenerateBankTransferCsvAsync(details, ct);
+        return File(csvBytes, "text/csv", $"payroll-export-{id}.csv");
+    }
+
+    [HttpGet("{id:guid}/export/payslips")]
+    public async Task<IActionResult> ExportPayslips(Guid id, CancellationToken ct)
+    {
+        var details = await _dbContext.PayrollRunDetails
+            .AsNoTracking()
+            .Where(d => d.PayrollRunId == id && !d.IsDeleted
+                && d.Status == Domain.Enums.PayrollRunDetailStatus.Calculated)
+            .Include(d => d.Employee)
+            .ToListAsync(ct);
+
+        if (details.Count == 0)
+            return NotFound("No calculated payroll details found for this run.");
+
+        // TODO: Generate ZIP archive of individual payslip PDFs
+        // For now, generate a single PDF placeholder
+        var firstDetail = details.First();
+        var pdfBytes = await _payslipGenerator.GeneratePayslipPdfAsync(firstDetail, ct);
+        return File(pdfBytes, "application/pdf", $"payslips-{id}.pdf");
     }
 }
 

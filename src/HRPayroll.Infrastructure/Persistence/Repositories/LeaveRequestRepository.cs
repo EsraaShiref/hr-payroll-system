@@ -9,7 +9,7 @@ public class LeaveRequestRepository : Repository<LeaveRequest>, ILeaveRequestRep
 {
     public LeaveRequestRepository(ApplicationDbContext dbContext) : base(dbContext) { }
 
-    public async Task<LeaveRequest?> GetByIdAsync(Guid id, CancellationToken ct = default)
+    public new async Task<LeaveRequest?> GetByIdAsync(Guid id, CancellationToken ct = default)
         => await DbSet.FirstOrDefaultAsync(l => l.Id == id && !l.IsDeleted, ct);
 
     public async Task<List<LeaveRequest>> GetPendingByDepartmentAsync(Guid departmentId, CancellationToken ct = default)

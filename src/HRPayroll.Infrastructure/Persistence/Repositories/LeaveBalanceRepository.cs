@@ -9,7 +9,7 @@ public class LeaveBalanceRepository : Repository<LeaveBalance>, ILeaveBalanceRep
 {
     public LeaveBalanceRepository(ApplicationDbContext dbContext) : base(dbContext) { }
 
-    public async Task<LeaveBalance?> GetByIdAsync(Guid id, CancellationToken ct = default)
+    public new async Task<LeaveBalance?> GetByIdAsync(Guid id, CancellationToken ct = default)
         => await DbSet.FirstOrDefaultAsync(l => l.Id == id && !l.IsDeleted, ct);
 
     public async Task<LeaveBalance?> GetByEmployeeAndTypeYearAsync(Guid employeeId, LeaveType leaveType, int year, CancellationToken ct = default)

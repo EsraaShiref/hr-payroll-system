@@ -60,6 +60,19 @@ public class Shift : BaseEntity
         Name = name.Trim();
     }
 
+    public void SetDescription(string? description)
+    {
+        Description = description?.Trim();
+    }
+
+    public void Update(string name, TimeOnly startTime, TimeOnly endTime, WorkingDayFlags workingDays)
+    {
+        SetName(name);
+        StartTime = startTime;
+        EndTime = endTime;
+        WorkingDays = workingDays;
+    }
+
     public void ConfigureRules(
         int gracePeriodMinutes,
         int lateThresholdMinutes,

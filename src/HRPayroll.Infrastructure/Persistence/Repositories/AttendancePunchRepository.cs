@@ -9,7 +9,7 @@ public class AttendancePunchRepository : Repository<AttendancePunch>, IAttendanc
 {
     public AttendancePunchRepository(ApplicationDbContext dbContext) : base(dbContext) { }
 
-    public async Task<AttendancePunch?> GetByIdAsync(Guid id, CancellationToken ct = default)
+    public new async Task<AttendancePunch?> GetByIdAsync(Guid id, CancellationToken ct = default)
         => await DbSet.FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted, ct);
 
     public async Task<List<AttendancePunch>> GetUnprocessedByDateRangeAsync(DateOnly from, DateOnly to, CancellationToken ct = default)

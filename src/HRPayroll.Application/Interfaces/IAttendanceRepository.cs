@@ -46,8 +46,10 @@ public interface ILeaveBalanceRepository
 
 public interface IHolidayRepository
 {
+    Task<Holiday?> GetByIdAsync(Guid id, CancellationToken ct = default);
     Task<List<Holiday>> GetByDateRangeAsync(DateOnly from, DateOnly to, CancellationToken ct = default);
     Task<Holiday?> GetByDateAsync(DateOnly date, CancellationToken ct = default);
     void Add(Holiday holiday);
     void Update(Holiday holiday);
+    void Remove(Holiday holiday);
 }

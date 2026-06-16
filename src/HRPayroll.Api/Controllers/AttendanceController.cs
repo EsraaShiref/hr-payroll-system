@@ -3,6 +3,7 @@ using HRPayroll.Application.Commands.Attendance.ProcessDailySummaries;
 using HRPayroll.Application.Commands.Attendance.OverrideAttendanceSummary;
 using HRPayroll.Application.Commands.Attendance.ResolveOrphanPunches;
 using HRPayroll.Application.Queries.Attendance.GetAttendanceExceptions;
+using HRPayroll.Application.Queries.Attendance.GetEmployeeAttendanceViewer;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -72,6 +73,19 @@ public class AttendanceController : ApiController
     {
         var result = await _mediator.Send(
             new GetAttendanceExceptionsQuery(fromDate, toDate, employeeId, exceptionType), ct);
+        return OkOrError(result);
+    }
+
+    [Authorize(Roles = "Admin,HR,Manager")]
+    [HttpGet("viewer/{employeeId:guid}")]
+    public async Task<IActionResult> GetViewer(
+        Guid employeeId,
+        [FromQuery] int year,
+        [FromQuery] int month,
+        CancellationToken ct = default)
+    {
+        var result = await _mediator.Send(
+            new GetEmployeeAttendanceViewerQuery(employeeId, year, month), ct);
         return OkOrError(result);
     }
 }

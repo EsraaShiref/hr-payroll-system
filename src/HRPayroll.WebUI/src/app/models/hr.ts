@@ -134,3 +134,94 @@ export interface AllowanceAssignmentInput {
   overrideAmount: number | null;
   overridePercentage: number | null;
 }
+
+// Payroll
+export interface PayrollRunListItem {
+  id: string;
+  year: number;
+  month: number;
+  status: string;
+  startedAt: string | null;
+  completedAt: string | null;
+  processedBy: string;
+  totalEmployees: number;
+  totalNetPay: number;
+}
+
+export interface PayrollRunStatus {
+  id: string;
+  year: number;
+  month: number;
+  status: string;
+  startedAt: string | null;
+  completedAt: string | null;
+  totalEmployees: number;
+  calculatedCount: number;
+  skippedCount: number;
+  failedCount: number;
+}
+
+export interface SkippedEmployeeInfo {
+  employeeId: string;
+  employeeName: string;
+  skipReason: string;
+}
+
+export interface FailedEmployeeInfo {
+  employeeId: string;
+  employeeName: string;
+  failureMessage: string;
+}
+
+export interface PayrollRunSummary {
+  id: string;
+  year: number;
+  month: number;
+  status: string;
+  startedAt: string | null;
+  completedAt: string | null;
+  processedBy: string;
+  totalGrossPay: number;
+  totalDeductions: number;
+  totalNetPay: number;
+  totalEmployees: number;
+  calculatedCount: number;
+  skippedCount: number;
+  failedCount: number;
+  skippedEmployees: SkippedEmployeeInfo[];
+  failedEmployees: FailedEmployeeInfo[];
+}
+
+export interface PayrollRunDetail {
+  employeeId: string;
+  employeeName: string;
+  employeeCode: string;
+  status: string;
+  skipReason: string | null;
+  failureMessage: string | null;
+  totalScheduledDays: number;
+  totalPresentDays: number;
+  totalAbsentDays: number;
+  totalLeaveDays: number;
+  totalOvertimeMinutes: number;
+  lateOccurrenceCount: number;
+  latePenaltyUnits: number;
+  baseSalary: number;
+  totalAllowances: number;
+  overtimePay: number;
+  grossPay: number;
+  leaveDeduction: number;
+  latePenaltyDeduction: number;
+  socialInsuranceEmployeeShare: number;
+  taxableIncome: number;
+  taxAmount: number;
+  totalDeductions: number;
+  netPay: number;
+}
+
+export interface PaginatedPayrollRuns {
+  items: PayrollRunListItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}

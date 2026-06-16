@@ -8,7 +8,7 @@ public class AttendanceSummaryRepository : Repository<AttendanceDailySummary>, I
 {
     public AttendanceSummaryRepository(ApplicationDbContext dbContext) : base(dbContext) { }
 
-    public async Task<AttendanceDailySummary?> GetByIdAsync(Guid id, CancellationToken ct = default)
+    public new async Task<AttendanceDailySummary?> GetByIdAsync(Guid id, CancellationToken ct = default)
         => await DbSet.FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted, ct);
 
     public async Task<AttendanceDailySummary?> GetByEmployeeAndDateAsync(Guid employeeId, DateOnly date, CancellationToken ct = default)

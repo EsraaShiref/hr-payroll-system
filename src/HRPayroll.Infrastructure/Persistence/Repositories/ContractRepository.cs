@@ -9,7 +9,7 @@ public class ContractRepository : Repository<Contract>, IContractRepository
 {
     public ContractRepository(ApplicationDbContext dbContext) : base(dbContext) { }
 
-    public async Task<Contract?> GetByIdAsync(Guid id, CancellationToken ct = default)
+    public new async Task<Contract?> GetByIdAsync(Guid id, CancellationToken ct = default)
         => await DbSet.FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted, ct);
 
     public async Task<Contract?> GetWithVersionsAsync(Guid id, CancellationToken ct = default)
